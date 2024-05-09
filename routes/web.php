@@ -7,6 +7,8 @@ use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -84,4 +86,10 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
+    //Admin Role
+    Route::get('/role', [RoleController::class, 'index']);
+    Route::post('/role/list', [RoleController::class, 'roleList']);
+    Route::post('/role/tambah', [RoleController::class, 'tambahRole']);
+    Route::put('/role/update/{id}', [RoleController::class, 'updateRole']);
+    Route::delete('/role/delete/{id}', [RoleController::class, 'deleteRole']);
 });

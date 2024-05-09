@@ -22,7 +22,7 @@ User | Hippam Kaligondo
             <div class="row">
                 <div class="col-sm-12">
                     <h4 class="page-title">User</h4>
-                    <p>List Pelanggan / User Hippam Kaligondo</p>
+                    <p>List Role / User Hippam Kaligondo</p>
                 </div>
             </div>
         </div>
@@ -33,17 +33,14 @@ User | Hippam Kaligondo
         <div class="container-fluid">
             <div class="card">
                 <div class="card-body">
-                    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#tambah">Tambah Pelanggan</button>
+                    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#tambah">Tambah Role</button>
                     <div class="table-responsive">
                         <table class="table table-striped" id="table-1">
                             <thead>
                                 <tr>
                                     <th>Nama</th>
                                     <th>Username</th>
-                                    <th>No. Telepon</th>
-                                    <th>RT</th>
-                                    <th>RW</th>
-                                    <th>Alamat</th>
+                                    <th>Role</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -64,13 +61,13 @@ User | Hippam Kaligondo
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="tambahLabel">Tambah Pelanggan</h5>
+        <h5 class="modal-title" id="tambahLabel">Tambah Role</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-            <form action="{{ url('/user/tambah') }}" method="post">
+            <form action="{{ url('/role/tambah') }}" method="post">
                 @csrf
                 <div class="form-group">
                     <label for="frist_name">Nama</label>
@@ -120,6 +117,19 @@ User | Hippam Kaligondo
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="form-group">
+                  <label for="role">Role</label>
+                  <select class="form-control @error('role') is-invalid @enderror" name="role" required>
+                      <option value="">Pilih Role</option>
+                      <option value="admin">Admin</option>
+                      <option value="ketuart">Ketua RT</option>
+                      <option value="petugas">Petugas</option>
+                  </select>
+                  @error('role')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
+              </div>
+
                 <h6 class="text-warning">Password otomstis diambil dari no. telepon</h6>
         </div>
         <div class="modal-footer">
@@ -136,7 +146,7 @@ User | Hippam Kaligondo
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editLabel">Edit Pelanggan</h5>
+        <h5 class="modal-title" id="editLabel">Edit Role</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -169,23 +179,6 @@ User | Hippam Kaligondo
                       @enderror
                     </div>
                 </div>
-                <div class="row">
-                  <div class="form-group col-6">
-                    <label for="">RT</label>
-                    <input type="number" class="form-control @error('rt') is-invalid @enderror" value="" id="rt" name="rt" required>
-                    <div class="invalid-feedback"></div>
-                    @error('rt')
-                      <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                  </div>
-                  <div class="form-group col-6">
-                    <label for="last_name">RW</label>
-                    <input type="number" class="form-control @error('rw') is-invalid @enderror" value="" id="rw" name="rw" required>
-                    @error('rw')
-                      <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                  </div>
-               </div>
                 <div class="form-group">
                     <label for="">Alamat</label>
                     <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" id="alamat" required></textarea>
@@ -199,6 +192,12 @@ User | Hippam Kaligondo
                         <h6 class="text-warning ml-2">Ganti Password otomatis generate ulang diambil dari no. telepon</h6>
                     </label>
                 </div>
+                <div class="form-group">
+                  <label for="role">Role</label>
+                  <select class="form-control" name="role" disabled>
+                      {{-- <option value="{{ $user->role }}">{{ ucfirst($user->role) }}</option> --}}
+                  </select>
+              </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
@@ -223,15 +222,12 @@ User | Hippam Kaligondo
         serverSide: true,
         ajax: {
             type: 'POST',
-            url: "user/list",
+            url: "role/list",
         },
         columns: [
             { data: 'nama', name: 'nama' },
             { data: 'username', name: 'username' },
-            { data: 'tlp', name: 'tlp' },
-            { data: 'alamat', name: 'alamat' },
-            { data: 'rt', name: 'rt' },
-            { data: 'rw', name: 'rw' },
+            { data: 'role', name: 'role' },
             { data: '', orderable: false },
         ],
         order: [[0, 'desc']],
@@ -256,7 +252,7 @@ User | Hippam Kaligondo
     });
 
     function edit(this_el, id_user) {
-        var url = '/user/update/'+id_user;
+        var url = '/role/update/'+id_user;
         var tr_el = this_el.closest('tr');
         var row = $("#table-1").DataTable().row(tr_el);
         var row_data = row.data();
@@ -265,37 +261,8 @@ User | Hippam Kaligondo
         $('#username_edit').val(row_data.username);
         $('#telepon').val(row_data.tlp);
         $('#alamat').val(row_data.alamat);
-        $('#rt').val(row_data.rt);
-        $('#rw').val(row_data.rw);
+        $('#role').val(row_data.role);
         $('#form_edit').attr('action', url);
-    }
-
-    function hapus(e) {
-        var url = 'user/delete/'+e;
-
-        swal({
-            title             : "Apakah Anda Yakin ?",
-            text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
-            type              : "warning",
-            showCancelButton  : true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor : "#d33",
-            confirmButtonText : "Ya, Tetap Hapus!"
-        }).then((result) => {
-            $.ajax({
-                url    : url,
-                type   : "delete",
-                success: function(data) {
-                    $('#table-1').DataTable().ajax.reload();
-                    swal({
-                        type: 'success',
-                        title: 'Data Pelanggan berhasil dihapus.',
-                        showConfirmButton: true,
-                        confirmButtonClass: 'btn btn-success',
-                    });
-                }
-            })
-        })
     }
 
 </script>

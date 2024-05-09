@@ -141,8 +141,8 @@
 
                             {{-- ADMIN --}}
                             @if(Auth::user()->role == 'admin')
-                            <li class="has-submenu {{ (request()->is('user*')) ? 'active' : '' }}">
-                                <a href="{{ url('/user') }}"><i class="mdi mdi-account-plus"></i>User</a>
+                            <li class="has-submenu {{ (request()->is('role*')) ? 'active' : '' }}">
+                                <a href="{{ url('/role') }}"><i class="mdi mdi-account-plus"></i>Role</a>
                             </li>
 
                             <li class="has-submenu {{ (request()->is('laporan*')) ? 'active' : '' }}">

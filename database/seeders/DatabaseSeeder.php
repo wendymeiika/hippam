@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Hash;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,7 +17,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'nama' => 'Mirta',
             'username' => 'mirta',
-            'password' => Hash::make('password'),
+            'password' => 'password',
             'role' => 'petugas',
             'tlp' => '088235837600',
             'alamat' => 'Wadung',
@@ -27,7 +26,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'nama' => 'Ali',
             'username' => 'ali',
-            'password' => Hash::make('password'),
+            'password' => 'password',
             'role' => 'pelanggan',
             'tlp' => '087678096123',
             'alamat' => 'Wadung Kaligondo',

@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\Bulan;
 use App\Models\Pembayaran;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,18 @@ class StoreHippamRTRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->role === 'ketuart';
+        return $this->user()->role->permissions()->where('name', 'Bayar lewat Ketua RT')->exists();
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'pelanggan' => User::query()->whereHas(
+                'role', fn (Builder $query) => $query->where('name', 'pelanggan')
+            )->where('rt', $this->user()->rt)
+                ->where('rw', $this->user()->rw)
+                ->firstOrFail(),
+        ]);
     }
 
     /**
@@ -29,12 +41,6 @@ class StoreHippamRTRequest extends FormRequest
             // pelanggan wajib ada di tabel user, role pelanggan, rt dan rw sama dengan ketuart
             'id_pelanggan' => [
                 'required',
-                Rule::exists(User::class, 'id')
-                    ->where(
-                        fn ($query) => $query->where('role', 'pelanggan')
-                            ->where('rt', $this->user()->rt)
-                            ->where('rw', $this->user()->rw)
-                    ),
                 Rule::unique(Pembayaran::class, 'id_pelanggan')
                     ->where(
                         fn ($query) => $query->where('bulan', (int) $this->bulan)

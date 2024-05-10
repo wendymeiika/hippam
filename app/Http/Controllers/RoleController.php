@@ -2,130 +2,103 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use Auth;
-use DataTables;
-use Exception;
-use Hash;
-use Validator;
+use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateRoleRequest;
+use App\Models\Group;
+use App\Models\Role;
+use Illuminate\View\View;
+use Yajra\DataTables\DataTables;
 
 class RoleController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(): View
     {
-        try {
-            return view('role.index');
-        } catch (Exception $e) {
-            return view('error');
-        }
+        return view('role.permission', [
+            'groups' => Group::query()->with('permissions')->get(),
+        ]);
     }
 
-    public function roleList(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
     {
-        if ($request->ajax()) {
-            // Definisikan daftar peran yang diinginkan
-            $roles = ['admin', 'ketuart', 'petugas'];
-    
-            // Gunakan klausa whereIn untuk mencocokkan peran yang ada dalam daftar
-            $data = User::whereIn('role', $roles)
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-    
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
-        }
+        //
     }
-    
-    public function tambahRole(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nama' => 'required',
-                'username' => 'required|unique:user',
-                'alamat' => 'required',
-                'rt' => 'required',
-                'rw' => 'required',
-                'tlp' => 'required|numeric|unique:user',
-                'role' => 'required|in:admin,ketuart,petugas', // Tambahkan validasi untuk peran
-            ]);
-    
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-    
-            User::create([
-                'nama' => $request->nama,
-                'username' => $request->username,
-                'alamat' => $request->alamat,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'tlp' => $request->tlp,
-                'password' => Hash::make($request->tlp),
-                'role' => $request->role, // Ambil nilai peran dari input form
-            ]);
-    
-            return back()->with('success', 'Berhasil menambahkan pengguna dengan peran ' . $request->role);
-        } catch (Exception $e) {
-            dd($e->getMessage());
-    
-            return view('error');
-        }
-    }
-    
-    public function updateRole(Request $request, $id)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nama' => 'required',
-                'username' => 'required',
-                'alamat' => 'required',
-                'rt' => 'required',
-                'rw' => 'required',
-                'telepon' => 'required|numeric',
-                'role' => 'required|in:admin,ketuart,petugas', // Tambahkan validasi untuk peran
-            ]);
-    
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-    
-            $user = User::find($id);
-            $input = $request->except(['telepon', 'pass']);
-            $input['tlp'] = $request->telepon;
-    
-            if ($request->username != $user->username) {
-                $check = User::where('username', $request->username)->count();
-                if ($check) {
-                    return back()->with('error', "Username ($request->username) sudah ada sebelumnya.");
-                }
-            }
-    
-            if ($request->telepon != $user->tlp) {
-                $checkWa = User::where('tlp', $request->telepon)->count();
-                if ($checkWa) {
-                    return back()->with('error', "No. Telepon ($request->telepon) sudah ada sebelumnya.");
-                }
-            }
-    
-            if ($request->pass) {
-                $input['password'] = Hash::make($request->telepon);
-            }
-    
-            // Update role pengguna
-            
-            $input['role'] = $request->role;
-    
-            $user->update($input);
-    
-            return back()->with('success', 'Data role berhasil diperbarui.');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
-        }
-    }
-    
 
-   
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreRoleRequest $request)
+    {
+        $role = Role::query()->create(['name' => $request->name]);
+
+        $role->permissions()->sync($request->permissions);
+
+        return redirect()->route('role.index')->with('success', __('Role telah ditambahkan'));
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Role $role)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Role $role)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateRoleRequest $request, Role $role)
+    {
+        $role->update(['name' => $request->name]);
+
+        $role->permissions()->sync($request->permissions);
+
+        return redirect()->route('role.index')->with('success', __('Role telah diperbarui'));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Role $role)
+    {
+        //
+    }
+
+    /**
+     * Datatable roles
+     */
+    public function datatable()
+    {
+        return DataTables::of(
+            Role::query()->with('permissions')->get()
+        )->addIndexColumn()
+            ->make(true);
+    }
 }

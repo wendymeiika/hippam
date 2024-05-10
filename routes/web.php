@@ -6,9 +6,9 @@ use App\Http\Controllers\KeluhanController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengumumanController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\RoleUserController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [HomeController::class, 'index'])->name('index.login');
+Route::get('/', [HomeController::class, 'index'])->name('index.login')->middleware('guest');
 Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware(['auth'])->group(function () {
@@ -35,25 +35,31 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/ganti-password', [UserController::class, 'updatePassword']);
 
     // keluhan
-    Route::get('/keluhan', [KeluhanController::class, 'index']);
+    Route::get('/keluhan', [KeluhanController::class, 'index'])->name('keluhan.index');
     Route::post('/keluhan/list', [KeluhanController::class, 'keluhanList']);
     Route::post('/keluhan/tambah', [KeluhanController::class, 'tambah']);
     Route::put('/keluhan/update/{id}', [KeluhanController::class, 'update']);
-    Route::delete('/keluhan/delete/{id}', [KeluhanController::class, 'delete']);
+    Route::delete('/keluhan/{id}', [KeluhanController::class, 'delete'])->name('keluhan.destroy');
 
     // pembayaran
-    Route::get('/pembayaran', [PembayaranController::class, 'index']);
+    Route::prefix('pembayaran')->name('pembayaran.')->controller(PembayaranController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
 
-    Route::middleware(['roles:pelanggan,ketuart'])->group(function () {
-        Route::get('/pembayaran/bayar', [PembayaranController::class, 'bayar']);
+        Route::get('list', 'list')->middleware('petugas')->name('list');
+
+        Route::middleware(['roles:pelanggan,ketuart'])->group(function () {
+            Route::get('/bayar', 'bayar')->name('bayar');
+        });
+
+        Route::post('/bayar', 'bayarHippam')->name('hippam');
+        Route::post('/bayar-by-rt', 'bayarHippamByRT')->name('hippamByRT');
+
+        Route::put('validate/{pembayaran}', 'validating')->name('validate');
+        // Route::post('/valid/{id}', 'valid')->name('validate');
+        // Route::post('/tolak/{id}', 'tolak')->name('reject');
+        Route::get('/riwayat', 'riwayat')->name('history');
+        Route::post('/riwayat/upload-ulang/{id}', 'uploadUlang')->name('reupload');
     });
-
-    Route::post('/pembayaran/bayar', [PembayaranController::class, 'bayarHippam']);
-    Route::post('/pembayaran/bayar-by-rt', [PembayaranController::class, 'bayarHippamByRT']);
-    Route::post('/pembayaran/valid/{id}', [PembayaranController::class, 'valid']);
-    Route::post('/pembayaran/tolak/{id}', [PembayaranController::class, 'tolak']);
-    Route::get('/pembayaran/riwayat', [PembayaranController::class, 'riwayat']);
-    Route::post('/pembayaran/riwayat/upload-ulang/{id}', [PembayaranController::class, 'uploadUlang']);
 
     // notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index']);
@@ -75,21 +81,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pengumuman/tambah', [PengumumanController::class, 'tambah']);
         Route::put('/pengumuman/update/{id}', [PengumumanController::class, 'update']);
         Route::delete('/pengumuman/delete/{id}', [PengumumanController::class, 'delete']);
-
-        // pembayaran
-        Route::post('/pembayaran/list', [PembayaranController::class, 'list']);
-
-        // laporan
-        Route::post('/laporan/list', [PembayaranController::class, 'listLaporan']);
-        Route::get('/laporan', [PembayaranController::class, 'laporan']);
-        Route::post('/laporan', [PembayaranController::class, 'laporan']);
-
     });
 
-    //Admin Role
-    Route::get('/role', [RoleController::class, 'index']);
-    Route::post('/role/list', [RoleController::class, 'roleList']);
-    Route::post('/role/tambah', [RoleController::class, 'tambahRole']);
-    Route::put('/role/update/{id}', [RoleController::class, 'updateRole']);
-    Route::delete('/role/delete/{id}', [RoleController::class, 'deleteRole']);
+    // laporan
+    Route::post('/laporan/list', [PembayaranController::class, 'listLaporan']);
+    Route::get('/laporan', [PembayaranController::class, 'laporan']);
+    Route::post('/laporan', [PembayaranController::class, 'laporan']);
+
+    // atur role
+    Route::get('role/datatable', [RoleController::class, 'datatable'])->name('role.datatable');
+    Route::resource('role', RoleController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    // Atur akses setiap user
+    Route::get('/role-user/list', [RoleUserController::class, 'roleList'])->name('role-user.datatable');
+    Route::resource('role-user', RoleUserController::class)->only(['index', 'store', 'update', 'destroy']);
+    // Route::get('/role', [RoleUserController::class, 'index']);
+    // Route::post('/role/tambah', [RoleUserController::class, 'tambahRole']);
+    // Route::put('/role/{id}', [RoleUserController::class, 'updateRole'])->name('role.update');
+    // Route::delete('/role/delete/{id}', [RoleUserController::class, 'deleteRole']);
 });

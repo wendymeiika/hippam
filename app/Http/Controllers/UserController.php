@@ -2,216 +2,115 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateUserPasswordRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Auth;
-use DataTables;
-use Exception;
-use Hash;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+use Yajra\DataTables\DataTables;
 
 class UserController extends Controller
 {
-    public function user()
+    public function user(): View
     {
-        try {
-            return view('user.list-user');
-        } catch (Exception $e) {
-            return view('error');
-        }
+        return view('user.list-user');
     }
 
-    public function userList(Request $request)
+    public function userList(Request $request): JsonResponse
     {
-        if ($request->ajax()) {
-            $data = User::where('role', 'pelanggan')->orderBy('created_at', 'desc')->get();
+        $data = User::where('role', 'pelanggan')->orderBy('created_at', 'desc')->get();
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
-        }
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
     }
 
     public function tambahUser(Request $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nama' => 'required',
-                'username' => 'required|unique:user',
-                'alamat' => 'required',
-                'rt' => 'required',
-                'rw' => 'required',
-                'tlp' => 'required|numeric|unique:user',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required',
+            'username' => 'required|unique:user',
+            'alamat' => 'required',
+            'rt' => 'required',
+            'rw' => 'required',
+            'tlp' => 'required|numeric|unique:user',
+        ]);
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            User::create([
-                'nama' => $request->nama,
-                'username' => $request->username,
-                'alamat' => $request->alamat,
-                'rt' => $request->rt,
-                'rw' => $request->rw,
-                'tlp' => $request->tlp,
-                'password' => Hash::make($request->tlp),
-                'role' => 'pelanggan',
-            ]);
-
-            return back()->with('success', 'Berhasil menambahkan Pelanggan');
-        } catch (Exception $e) {
-            dd($e->getMessage());
-
-            return view('error');
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
+
+        User::create([
+            'nama' => $request->nama,
+            'username' => $request->username,
+            'alamat' => $request->alamat,
+            'rt' => $request->rt,
+            'rw' => $request->rw,
+            'tlp' => $request->tlp,
+            'password' => $request->tlp,
+        ]);
     }
 
-    public function updateUser(Request $request, $id)
+    public function updateUser(Request $request, User $id)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nama' => 'required',
-                'username' => 'required',
-                'alamat' => 'required',
-                'rt' => 'required',
-                'rw' => 'required',
-                'telepon' => 'required|numeric',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'nama' => 'required',
+            'username' => ['required', Rule::unique(User::class, 'username')->ignore($id)],
+            'alamat' => 'required',
+            // 'rt' => 'required',
+            // 'rw' => 'required',
+            'telepon' => ['required', 'numeric', Rule::unique(User::class, 'tlp')->ignore($id)],
+        ]);
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            $user = User::find($id);
-            $input = $request->except(['telepon', 'pass']);
-            $input['tlp'] = $request->telepon;
-
-            if ($request->username != $user->username) {
-                $check = User::where('username', $request->username)->count();
-                if ($check) {
-                    return back()->with('error', "Username ($request->username) sudah ada sebelumnya.");
-                }
-            }
-
-            if ($request->telepon != $user->tlp) {
-                $checkWa = User::where('tlp', $request->telepon)->count();
-                if ($checkWa) {
-                    return back()->with('error', "No. Telepon ($request->telepon) sudah ada sebelumnya.");
-                }
-            }
-
-            if ($request->pass) {
-                $input['password'] = Hash::make($request->telepon);
-            }
-
-            $user->update($input);
-
-            return back()->with('success', 'Data Pelanggan berhasil diperbarui.');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
+
+        $input = $request->except(['telepon', 'pass']);
+        $input['tlp'] = $request->telepon;
+
+        if ($request->pass) {
+            $input['password'] = $request->telepon;
+        }
+
+        $id->update($input);
+
+        return back()->with('success', 'Data Pelanggan berhasil diperbarui.');
     }
 
-    public function deleteUser($id)
+    public function deleteUser(User $id): JsonResponse
     {
-        try {
-            User::destroy($id);
+        $id->delete();
 
-            return response()->json('success', 200);
-        } catch (Exception $e) {
-            return view('error');
-        }
+        return response()->json('success', 200);
     }
 
-    public function editProfile()
+    public function editProfile(): View
     {
-        try {
-            return view('profile.edit-profile');
-        } catch (Exception $e) {
-            return view('error');
-        }
+        return view('profile.edit-profile');
     }
 
-    public function gantiPassword()
+    public function gantiPassword(): View
     {
-        try {
-            return view('profile.ganti-password');
-        } catch (Exception $e) {
-            return view('error');
-        }
+        return view('profile.ganti-password');
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateUserRequest $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'nama' => 'required',
-                'username' => 'required',
-                'alamat' => 'required',
-                'rt' => 'required',
-                'rw' => 'required',
-                'telepon' => 'required|numeric',
-            ]);
+        $request->user()->update($request->validated());
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            $user = User::find(Auth::user()->id);
-            $input = $request->except(['telepon']);
-            $input['tlp'] = $request->telepon;
-
-            if ($request->username != $user->username) {
-                $check = User::where('username', $request->username)->count();
-                if ($check) {
-                    return back()->with('error', "Username ($request->username) sudah ada sebelumnya.");
-                }
-            }
-
-            if ($request->tlp != $user->tlp) {
-                $check = User::where('tlp', $request->tlp)->count();
-                if ($check) {
-                    return back()->with('error', "No. Telepon ($request->telepon) ini sudah ada sebelumnya.");
-                }
-            }
-
-            $user->update($input);
-
-            return back()->with('success', 'Profile berhasil diperbarui.');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
-        }
+        return back()->with('success', 'Profile berhasil diperbarui.');
     }
 
-    public function updatePassword(Request $request)
+    public function updatePassword(UpdateUserPasswordRequest $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'old_password' => 'required',
-                'password' => 'required|confirmed|min:8',
-            ]);
+        $request->user()->update([
+            'password' => $request->password,
+        ]);
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            $user = User::find(Auth::user()->id);
-
-            if (Hash::check($request->old_password, $user->password)) {
-                $user->update([
-                    'password' => Hash::make($request->password),
-                ]);
-
-                return back()->with('success', 'Password berhasil diperbarui');
-            }
-
-            return back()->with('error', 'Password lama tidak sesuai');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
-        }
+        return back()->with('success', 'Password berhasil diperbarui');
     }
 }

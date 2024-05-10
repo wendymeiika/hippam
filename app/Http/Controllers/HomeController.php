@@ -3,27 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengumuman;
-use Auth;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        if (Auth::check()) {
-            return redirect('/home');
-        }
-
         return view('login');
     }
 
-    public function home()
+    public function home(): View
     {
-        try {
-            $info = Pengumuman::orderBy('id', 'desc')->get();
-
-            return view('home', compact(['info']));
-        } catch (Exception $e) {
-            return view('error');
-        }
+        return view('home', [
+            'info' => Pengumuman::query()->orderBy('id', 'desc')->get(),
+        ]);
     }
 }

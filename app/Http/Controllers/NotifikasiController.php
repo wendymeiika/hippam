@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notifikasi;
-use Auth;
-use DataTables;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 
 class NotifikasiController extends Controller
 {
@@ -16,16 +16,17 @@ class NotifikasiController extends Controller
 
     public function list(Request $request)
     {
-        if ($request->ajax()) {
-            if (Auth::user()->role == 'petugas') {
-                $data = Notifikasi::where('petugas', 1)->orderBy('id', 'desc')->get();
-            } else {
-                $data = Notifikasi::where('id_pelanggan', Auth::user()->id)->where('petugas', false)->orderBy('id', 'desc')->get();
-            }
+        $data = Notifikasi::query()
+            ->when(
+                $request->user()->role->name === 'petugas',
+                fn (Builder $query) => $query->where('petugas', 1),
+                fn (Builder $query) => $query->where('id_pelanggan', $request->user()->id)
+                    ->where('petugas', false)
+            )->latest()
+            ->get();
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
-        }
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,6 +22,10 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $casts = [
+        'password' => 'hashed',
+    ];
+
     /**
      * Definisikan relasi Eloquent untuk mengaitkan pengguna dengan pembayaran.
      */
@@ -38,8 +42,11 @@ class User extends Authenticatable
         return $this->hasMany(Notifikasi::class, 'id_pelanggan');
     }
 
-    public function scopeRole(Builder $query, $role): Builder
+    /**
+     * Get the role that owns the User
+     */
+    public function role(): BelongsTo
     {
-        return $query->where('role', $role);
+        return $this->belongsTo(Role::class);
     }
 }

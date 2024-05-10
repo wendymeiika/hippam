@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use Auth;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -16,7 +15,7 @@ class Petugas
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::user()->role == 'petugas') {
+        if ($request->user()->role->name == 'petugas') {
             return $next($request);
         }
 

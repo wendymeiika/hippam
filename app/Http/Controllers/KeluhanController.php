@@ -4,72 +4,66 @@ namespace App\Http\Controllers;
 
 use App\Models\Keluhan;
 use App\Models\Notifikasi;
-use Auth;
-use DataTables;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
+use Yajra\DataTables\DataTables;
 
 class KeluhanController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        try {
-            return view('keluhan.list-keluhan');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
-        }
+        return view('keluhan.list-keluhan');
     }
 
     public function keluhanList(Request $request)
     {
-        if ($request->ajax()) {
-            if (Auth::user()->role == 'petugas') {
-                $data = Keluhan::orderBy('created_at', 'desc')->get();
-            } else {
-                $data = Keluhan::where('id_pelanggan', Auth::user()->id)->orderBy('created_at', 'desc')->get();
-            }
+        $data = Keluhan::query()
+            ->when(
+                $request->user()->role->permissions()->where('name', 'Tambah Keluhan')->exists(),
+                fn (Builder $query) => $query->where('id_pelanggan', $request->user()->id),
+            )->latest()
+            ->get();
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
+
+        if ($request->ajax()) {
         }
     }
 
-    public function tambah(Request $request)
+    public function tambah(Request $request): RedirectResponse
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'keluhan' => 'required',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'keluhan' => 'required',
+        ]);
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            Keluhan::create([
-                'id_pelanggan' => Auth::user()->id,
-                'nama' => Auth::user()->nama,
-                'tlp' => Auth::user()->tlp,
-                'alamat' => Auth::user()->alamat,
-                'keluhan' => $request->keluhan,
-            ]);
-
-            Notifikasi::create([
-                'id_pelanggan' => Auth::user()->id,
-                'nama' => Auth::user()->nama,
-                'tlp' => Auth::user()->tlp,
-                'type' => 'keluhan',
-                'pesan' => 'Keluhan baru, cek pada menu keluhan',
-                'petugas' => 1,
-            ]);
-
-            return back()->with('success', 'Berhasil menambahkan Keluhan');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
+
+        Keluhan::create([
+            'id_pelanggan' => $request->user()->id,
+            'nama' => $request->user()->nama,
+            'tlp' => $request->user()->tlp,
+            'alamat' => $request->user()->alamat,
+            'keluhan' => $request->keluhan,
+        ]);
+
+        Notifikasi::create([
+            'id_pelanggan' => $request->user()->id,
+            'nama' => $request->user()->nama,
+            'tlp' => $request->user()->tlp,
+            'type' => 'keluhan',
+            'pesan' => 'Keluhan baru, cek pada menu keluhan',
+            'petugas' => 1,
+        ]);
+
+        return back()->with('success', 'Berhasil menambahkan Keluhan');
     }
 
     public function update(Request $request, $id)
@@ -86,10 +80,10 @@ class KeluhanController extends Controller
             $keluhan = Keluhan::find($id);
 
             $keluhan->update([
-                'id_pelanggan' => Auth::user()->id,
-                'nama' => Auth::user()->nama,
-                'tlp' => Auth::user()->tlp,
-                'alamat' => Auth::user()->alamat,
+                'id_pelanggan' => $request->user()->id,
+                'nama' => $request->user()->nama,
+                'tlp' => $request->user()->tlp,
+                'alamat' => $request->user()->alamat,
                 'keluhan' => $request->keluhan,
             ]);
 

@@ -15,7 +15,7 @@ Home | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -24,7 +24,7 @@ Home | Hippam Kaligondo
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12 col-md-6 col-lg-6">
-                            <h5 class="text-capitalize">Info {{ Auth::user()->role }}</h5>
+                            <h5 class="text-capitalize">Info {{ Auth::user()->role?->name }}</h5>
                             <hr>
                             <div class="card directory-card m-b-20">
                                 <div class="card-body directory-card-bg">

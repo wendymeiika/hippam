@@ -4,54 +4,43 @@ namespace App\Http\Controllers;
 
 use App\Enums\Bulan;
 use App\Http\Requests\StoreHippamRTRequest;
+use App\Http\Requests\UpdatePembayaranValidationRequest;
 use App\Models\Notifikasi;
 use App\Models\Pembayaran;
 use App\Models\User;
-use Auth;
-use Carbon\Carbon;
-use DataTables;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Storage;
-use Validator;
+use Yajra\DataTables\DataTables;
 
 class PembayaranController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        return Auth::user()->role == 'petugas'
-            ? view('pembayaran.list-petugas')
-            : view('pembayaran.list-pelanggan');
+        return view($request->user()->role->permissions()->where('name', 'Validasi')->exists()
+        ? 'pembayaran.list-petugas'
+        : 'pembayaran.list-pelanggan');
     }
 
-    public function list(Request $request)
+    public function list(): JsonResponse
     {
-        if ($request->ajax()) {
-            $data = Pembayaran::orderBy('id', 'desc')->get();
-
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
-        }
+        return DataTables::of(Pembayaran::orderBy('id', 'desc')->get())
+            ->addIndexColumn()
+            ->make(true);
     }
-
-    // public function bayar()
-    // {
-    //     try {
-    //         return view('pembayaran.bayar');
-    //     } catch (Exception $e) {
-    //         return view('error');
-    //         dd($e->getMessage());
-    //     }
-    // }
 
     public function bayar(Request $request): View
     {
-        return match ($request->user()->role) {
+        return match ($request->user()->role->name) {
             'pelanggan' => view('pembayaran.bayar'),
             'ketuart' => view('pembayaran.bayar-by-rt', [
-                'pelanggan' => User::query()->role('pelanggan')
+                'pelanggan' => User::query()
+                    ->whereHas('role', fn (Builder $query) => $query->where('name', 'pelanggan'))
                     ->where('rt', $request->user()->rt)
                     ->where('rw', $request->user()->rw)
                     ->get(),
@@ -62,78 +51,75 @@ class PembayaranController extends Controller
 
     public function bayarHippam(Request $request)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'bulan' => 'required',
-                'bukti' => 'required|max:2048',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'bulan' => 'required',
+            'bukti' => 'required|max:2048',
+        ]);
 
-            if ($validator->fails()) {
-                return back()->withErrors($validator)->withInput();
-            }
-
-            $bulan_sekarang = date('m');
-            $tahun_sekarang = date('Y');
-            $id_pelanggan = Auth::user()->id;
-
-            if ($request->bulan > $bulan_sekarang) {
-                return back()->with('error', 'Bulan yang dipilih melebihi bulan sekarang.');
-            }
-
-            $check_pembayaran = Pembayaran::where('id_pelanggan', $id_pelanggan)->where('tahun', $tahun_sekarang)->where('bulan', $request->bulan)->count();
-            if ($check_pembayaran) {
-                return back()->with('error', 'Pembayaran sudah dilakukan, lihat di riwayat.');
-            }
-
-            $path = 'images/bukti/';
-            $bukti = uploads($request->bukti, $path);
-
-            Pembayaran::create([
-                'id_pelanggan' => $id_pelanggan,
-                'nama' => Auth::user()->nama,
-                'tlp' => Auth::user()->tlp,
-                'alamat' => Auth::user()->alamat,
-                'bulan' => $request->bulan,
-                'tahun' => $tahun_sekarang,
-                'bukti' => $bukti,
-                'status' => 'waiting',
-            ]);
-
-            Notifikasi::create([
-                'id_pelanggan' => $id_pelanggan,
-                'nama' => Auth::user()->nama,
-                'tlp' => Auth::user()->tlp,
-                'type' => 'pembayaran',
-                'pesan' => 'Pembayaran hippam bulan '.bulan_indo($request->bulan).' '.$tahun_sekarang,
-                'petugas' => 1,
-            ]);
-
-            return back()->with('success', 'Pembayaran berhasil, tunggu validasi admin.');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
+
+        $bulan_sekarang = date('m');
+        $tahun_sekarang = date('Y');
+
+        if ($request->bulan > $bulan_sekarang) {
+            return back()->with('error', 'Bulan yang dipilih melebihi bulan sekarang.');
+        }
+
+        $check_pembayaran = Pembayaran::query()
+            ->where('id_pelanggan', $request->user()->id)
+            ->where('tahun', $tahun_sekarang)
+            ->where('bulan', $request->bulan)
+            ->exists();
+
+        if ($check_pembayaran) {
+            return back()->with('error', 'Pembayaran sudah dilakukan, lihat di riwayat.');
+        }
+
+        $path = 'images/bukti/';
+        $bukti = uploads($request->bukti, $path);
+
+        Pembayaran::create([
+            'id_pelanggan' => $request->user()->id,
+            'nama' => $request->user()->nama,
+            'tlp' => $request->user()->tlp,
+            'alamat' => $request->user()->alamat,
+            'bulan' => $request->bulan,
+            'tahun' => $tahun_sekarang,
+            'bukti' => $bukti,
+            'status' => 'waiting',
+        ]);
+
+        Notifikasi::create([
+            'id_pelanggan' => $request->user()->id,
+            'nama' => $request->user()->nama,
+            'tlp' => $request->user()->tlp,
+            'type' => 'pembayaran',
+            'pesan' => 'Pembayaran hippam bulan '.bulan_indo($request->bulan).' '.$tahun_sekarang,
+            'petugas' => 1,
+        ]);
+
+        return back()->with('success', 'Pembayaran berhasil, tunggu validasi admin.');
     }
 
     public function bayarHippamByRT(StoreHippamRTRequest $request)
     {
-        $pelanggan = User::find($request->id_pelanggan);
-
-        $pelanggan->pembayarans()->create([
+        $request->pelanggan->pembayarans()->create([
             'bulan' => $request->bulan,
             'tahun' => date('Y'),
             'status' => 'waiting',
-            'nama' => $pelanggan->nama,
-            'tlp' => $pelanggan->tlp,
-            'alamat' => $pelanggan->alamat,
+            'nama' => $request->pelanggan->nama,
+            'tlp' => $request->pelanggan->tlp,
+            'alamat' => $request->pelanggan->alamat,
         ]);
 
-        $pelanggan->notifications()->create([
-            'nama' => $pelanggan->nama,
-            'tlp' => $pelanggan->tlp,
+        $request->pelanggan->notifications()->create([
+            'nama' => $request->pelanggan->nama,
+            'tlp' => $request->pelanggan->tlp,
             'type' => 'pembayaran',
             'pesan' => 'Pembayaran hippam bulan '.Bulan::from($request->bulan)->name.' '.date('Y').' telah diproses oleh Ketua RT.',
-            'petugas' => Auth::id(), // ID Ketua RT yang masuk
+            'petugas' => $request->user()->id, // ID Ketua RT yang masuk
         ]);
 
         return back()->with('success', 'Pembayaran berhasil diproses.');
@@ -148,84 +134,69 @@ class PembayaranController extends Controller
         //     )-get();
     }
 
-    public function tolak($id)
+    public function validating(UpdatePembayaranValidationRequest $request, Pembayaran $pembayaran)
     {
-        try {
-            $pembayaran = Pembayaran::find($id);
-            $pembayaran->update([
-                'status' => 'reject',
-                'read' => true,
-            ]);
+        $pembayaran->update([
+            'status' => $request->status,
+            'read' => true,
+        ]);
 
-            Notifikasi::create([
-                'id_pelanggan' => $pembayaran->id_pelanggan,
-                'nama' => $pembayaran->nama,
-                'tlp' => $pembayaran->tlp,
-                'type' => 'pembayaran',
-                'pesan' => 'Pembayaran hippam bulan '.bulan_indo($pembayaran->bulan).' '.$pembayaran->tahun.' ditolak. Silahkan unggah ulang bukti yang benar.',
-                'petugas' => 0,
-            ]);
+        $message = 'Pembayaran hippam bulan '.Bulan::from($pembayaran->bulan)->name.' '.$pembayaran->tahun.' '
+        .($request->status == 'success' ? 'diverifikasi.' : 'ditolak. Silahkan unggah ulang bukti yang benar.');
 
-            return response()->json('success', 200);
-        } catch (Exception $e) {
-            return response()->json('error', 500);
-            dd($e->getMessage());
-        }
+        Notifikasi::create([
+            'id_pelanggan' => $pembayaran->id_pelanggan,
+            'nama' => $pembayaran->nama,
+            'tlp' => $pembayaran->tlp,
+            'type' => 'pembayaran',
+            'pesan' => $message,
+            'petugas' => 0,
+        ]);
+
+        return response()->json('success', 200);
     }
 
-    public function riwayat()
+    public function riwayat(Request $request): View
     {
-        try {
-            $id_pelanggan = Auth::user()->id;
-            $tahun_sekarang = date('Y');
-            $riwayat = Pembayaran::where('id_pelanggan', $id_pelanggan)->where('tahun', $tahun_sekarang)->get();
+        $riwayat = Pembayaran::where('id_pelanggan', $request->user()->id)->where('tahun', date('Y'))->get();
 
-            return view('pembayaran.riwayat', compact(['riwayat']));
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
-        }
+        return view('pembayaran.riwayat', compact(['riwayat']));
     }
 
-    public function uploadUlang(Request $request, $id)
+    public function uploadUlang(Request $request, $id): RedirectResponse
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'bukti' => 'required|max:2048',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'bukti' => 'required|max:2048',
+        ]);
 
-            if ($validator->fails()) {
-                return back()->with('error', 'Unggah Bukti dengan benar.');
-            }
-
-            $pembayaran = Pembayaran::find($id);
-
-            $path = 'images/bukti/';
-            $bukti = uploads($request->bukti, $path);
-
-            Storage::delete($path.'/'.$pembayaran->bukti);
-
-            $pembayaran->update([
-                'bukti' => $bukti,
-                'status' => 'waiting',
-                'read' => false,
-                'updated_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            Notifikasi::create([
-                'id_pelanggan' => $pembayaran->id_pelanggan,
-                'nama' => $pembayaran->nama,
-                'tlp' => $pembayaran->tlp,
-                'type' => 'pembayaran',
-                'pesan' => 'Pembayaran ulang hippam bulan '.bulan_indo($pembayaran->bulan).' '.$pembayaran->tahun,
-                'petugas' => 1,
-            ]);
-
-            return back()->with('success', 'Pembayaran berhasil, tunggu validasi admin.');
-        } catch (Exception $e) {
-            return view('error');
-            dd($e->getMessage());
+        if ($validator->fails()) {
+            return back()->with('error', 'Unggah Bukti dengan benar.');
         }
+
+        $pembayaran = Pembayaran::find($id);
+
+        $path = 'images/bukti/';
+        $bukti = uploads($request->bukti, $path);
+
+        Storage::delete($path.'/'.$pembayaran->bukti);
+
+        $pembayaran->update([
+            'bukti' => $bukti,
+            'status' => 'waiting',
+            'read' => false,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        Notifikasi::create([
+            'id_pelanggan' => $pembayaran->id_pelanggan,
+            'nama' => $pembayaran->nama,
+            'tlp' => $pembayaran->tlp,
+            'type' => 'pembayaran',
+            'pesan' => 'Pembayaran ulang hippam bulan '.bulan_indo($pembayaran->bulan).' '.$pembayaran->tahun,
+            'petugas' => 1,
+        ]);
+
+        return back()->with('success', 'Pembayaran berhasil, tunggu validasi admin.');
     }
 
     public function laporan(Request $request)
@@ -262,22 +233,17 @@ class PembayaranController extends Controller
 
     public function listLaporan(Request $request)
     {
-        if ($request->ajax()) {
-            if ($request->dari && $request->sampai) {
-                $data = Pembayaran::orderBy('id', 'desc')
-                    ->where('status', 'success')
-                    ->whereDate('updated_at', '>=', $request->dari)
+        $data = Pembayaran::query()
+            ->latest()
+            ->where('status', 'success')
+            ->when(
+                $request->dari && $request->sampai,
+                fn (Builder $query) => $query->whereDate('updated_at', '>=', $request->dari)
                     ->whereDate('updated_at', '<=', $request->sampai)
-                    ->get();
-            } else {
-                $data = Pembayaran::orderBy('id', 'desc')
-                    ->where('status', 'success')
-                    ->get();
-            }
+            )->get();
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
-        }
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
     }
 }

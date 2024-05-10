@@ -16,7 +16,7 @@ Pembayaran | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -37,7 +37,7 @@ Pembayaran | Hippam Kaligondo
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
                     </div>
@@ -61,8 +61,8 @@ Pembayaran | Hippam Kaligondo
         processing: true,
         serverSide: true,
         ajax: {
-            type: 'POST',
-            url: "pembayaran/list",
+            type: 'GET',
+            url: "{{ route('pembayaran.list') }}",
         },
         columns: [
             { data: 'nama', name: 'nama' },
@@ -111,82 +111,45 @@ Pembayaran | Hippam Kaligondo
           targets: -1,
           orderable: false,
           render: function (data, type, full, meta) {
-            var id = full['id'];
-            var status = full['status'];
-
-            if(status == 'waiting') {
-              return (
-                '<div class="btn-group bg-secondary text-white">' +
-                  '<a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>' +
-                  '<div class="dropdown-menu dropdown-menu-right">' +
-                  '<a href="javascript:;" class="dropdown-item bg-success text-white" onclick="valid('+ id +')">Valid</a>' +
-                  '<a href="javascript:;" class="dropdown-item bg-danger text-white" onclick="tolak('+ id +')">Tolak</a>' +
-                  '</div>' +
-                '</div>'
-              );
-            } else {
-              return 'Tidak ada aksi.';
-            }
+            return full.status == 'waiting' ?
+            `<div class="btn-group bg-secondary text-white">
+                <a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>
+                <div class="dropdown-menu dropdown-menu-right">
+                <a href="javascript:;" class="dropdown-item bg-success text-white" onclick="validation(${full.id}, 'success')">Valid</a>
+                <a href="javascript:;" class="dropdown-item bg-danger text-white" onclick="validation(${full.id}, 'reject')">Tolak</a>
+                </div>
+            </div>`
+            : 'Tidak ada aksi.'
           }
         }
       ],
     });
 
-    function valid(id) {
-      var url = 'pembayaran/valid/'+id;
-
-      swal({
-          title             : "Apakah Anda Yakin ?",
-          text              : "Validasi Pembayaran",
-          type              : "warning",
-          showCancelButton  : true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor : "#d33",
-          confirmButtonText : "Ya, validasi"
-      }).then((result) => {
-          $.ajax({
-              url    : url,
-              type   : "post",
-              success: function(data) {
-                  $('#table-1').DataTable().ajax.reload();
-                  swal({
-                      type: 'success',
-                      title: 'Data Pembayaran berhasil DIVALIDASI.',
-                      showConfirmButton: true,
-                      confirmButtonClass: 'btn btn-success',
-                  });
-              }
-          })
-      });
+    const validation = (id, status) => {
+        swal({
+            title             : "Apakah Anda Yakin?",
+            text              : status == 'success' ? "Validasi Pembayaran" : 'Tolak Pembayaran',
+            type              : "warning",
+            showCancelButton  : true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor : "#d33",
+            confirmButtonText : "Ya"
+        }).then((result) => {
+            $.ajax({
+                url    : `{{ route('pembayaran.validate', ':id') }}`.replace(':id', id),
+                type   : "put",
+                data   : {status: status},
+                success: (data) => {
+                    $('#table-1').DataTable().ajax.reload();
+                    swal({
+                        type: 'success',
+                        title: 'Data Pembayaran berhasil tersimpan.',
+                        showConfirmButton: true,
+                        confirmButtonClass: 'btn btn-success',
+                    });
+                }
+            })
+        });
     }
-
-    function tolak(id) {
-      var url = 'pembayaran/tolak/'+id;
-
-      swal({
-          title             : "Apakah Anda Yakin ?",
-          text              : "Tolak Pembayaran",
-          type              : "warning",
-          showCancelButton  : true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor : "#d33",
-          confirmButtonText : "Ya, Tolak"
-      }).then((result) => {
-          $.ajax({
-              url    : url,
-              type   : "post",
-              success: function(data) {
-                  $('#table-1').DataTable().ajax.reload();
-                  swal({
-                      type: 'success',
-                      title: 'Data Pembayaran berhasil DITOLAK.',
-                      showConfirmButton: true,
-                      confirmButtonClass: 'btn btn-success',
-                  });
-              }
-          })
-      });
-    }
-
 </script>
 @endsection

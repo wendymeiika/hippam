@@ -16,7 +16,7 @@ Pembayaran | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -69,11 +69,4 @@ Pembayaran | Hippam Kaligondo
     </div>
 
 </div>
-@endsection
-
-@section('js')
-<script>
-
-
-</script>
 @endsection

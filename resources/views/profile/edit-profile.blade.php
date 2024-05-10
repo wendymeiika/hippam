@@ -16,13 +16,23 @@ Edit Profile | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
         <div class="container-fluid">
             <div class="card">
                 <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ url('/profile/edit-profile') }}">
                         @csrf
                         @method('put')
@@ -42,8 +52,8 @@ Edit Profile | Hippam Kaligondo
                         </div>
                         <div class="form-group">
                             <label for="">No. Telepon</label>
-                            <input type="number" class="form-control @error('telepon') is-invalid @enderror" value="{{ Auth::user()->tlp }}" name="telepon" required>
-                            @error('telepon')
+                            <input type="number" class="form-control @error('tlp') is-invalid @enderror" value="{{ Auth::user()->tlp }}" name="tlp" required>
+                            @error('tlp')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

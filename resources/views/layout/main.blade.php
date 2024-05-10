@@ -36,7 +36,7 @@
 
                     <!-- Logo container-->
                     <div class="logo">
-                        
+
                         <!-- <a href="{{ url('/home') }}" class="logo">
                             <img src="assets/images/logo-sm-light.png" alt="" class="logo-small">
                             <img src="assets/images/logo-light.png" alt="" class="logo-large">
@@ -50,7 +50,7 @@
 
                     <div class="clearfix"></div>
 
-                </div> 
+                </div>
             </div>
 
             <div class="navbar-custom">
@@ -61,95 +61,28 @@
                             <li class="has-submenu {{ (request()->is('home*')) ? 'active' : '' }}">
                                 <a href="{{ url('/home') }}"><i class="mdi mdi-home"></i>Home</a>
                             </li>
-                            
-                            {{-- PELANGGAN --}}
-                            @if(Auth::user()->role == 'pelanggan')
-                            <li class="has-submenu {{ (request()->is('keluhan*')) ? 'active' : '' }}">
-                                <a href="{{ url('/keluhan') }}"><i class="mdi mdi-book-open-page-variant"></i>Keluhan</a>
-                            </li>
 
-                            <li class="has-submenu {{ (request()->is('pembayaran*')) ? 'active' : '' }}">
-                                <a href="{{ url('/pembayaran') }}"><i class="mdi mdi-clipboard"></i>Pembayaran</a>
-                            </li>
+                            {{-- PELANGGAN & Ketua RT --}}
+                            <x-pelanggan-sidebar :permissions="Auth::user()->role->permissions" />
 
-                            <li class="has-submenu {{ (request()->is('notifikasi*')) ? 'active' : '' }}">
-                                <a href="{{ url('/notifikasi') }}"><i class="mdi mdi-bell"></i>Notifikasi</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('profile*')) ? 'active' : '' }}">
-                                <a href="#"><i class="mdi mdi-account"></i>Profile</a>
-                                <ul class="submenu megamenu">
-                                    <li>
-                                        <ul>
-                                            <li><a href="{{ url('/profile/edit-profile') }}">Edit profile</a></li>
-                                            <li><a href="{{ url('/profile/ganti-password') }}">Ganti Password</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            @endif
-
-                            {{-- KETUA RT --}}
-                            @if(Auth::user()->role == 'ketuart')
-                            <li class="has-submenu {{ (request()->is('keluhan*')) ? 'active' : '' }}">
-                                <a href="{{ url('/keluhan') }}"><i class="mdi mdi-book-open-page-variant"></i>Keluhan</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('pembayaran*')) ? 'active' : '' }}">
-                                <a href="{{ url('/pembayaran') }}"><i class="mdi mdi-clipboard"></i>Pembayaran</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('notifikasi*')) ? 'active' : '' }}">
-                                <a href="{{ url('/notifikasi') }}"><i class="mdi mdi-bell"></i>Notifikasi</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('profile*')) ? 'active' : '' }}">
-                                <a href="#"><i class="mdi mdi-account"></i>Profile</a>
-                                <ul class="submenu megamenu">
-                                    <li>
-                                        <ul>
-                                            <li><a href="{{ url('/profile/edit-profile') }}">Edit profile</a></li>
-                                            <li><a href="{{ url('/profile/ganti-password') }}">Ganti Password</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                            @endif
-                            
                             {{-- PETUGAS --}}
-                            @if(Auth::user()->role == 'petugas')
-                            <li class="has-submenu {{ (request()->is('user*')) ? 'active' : '' }}">
-                                <a href="{{ url('/user') }}"><i class="mdi mdi-account-plus"></i>User</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('pembayaran*')) ? 'active' : '' }}">
-                                <a href="{{ url('/pembayaran') }}"><i class="mdi mdi-clipboard"></i>Pembayaran</a>
-                            </li>
-                            
-                            <li class="has-submenu {{ (request()->is('notifikasi*')) ? 'active' : '' }}">
-                                <a href="{{ url('/notifikasi') }}"><i class="mdi mdi-bell"></i>Notifikasi</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('pengumuman*')) ? 'active' : '' }}">
-                                <a href="{{ url('/pengumuman') }}"><i class="mdi mdi-bullhorn"></i>Pengumuman</a>
-                            </li>
-
-                            <li class="has-submenu {{ (request()->is('laporan*')) ? 'active' : '' }}">
-                                <a href="{{ url('/laporan') }}"><i class="mdi mdi-file-chart"></i>Laporan</a>
-                            </li>
-                            @endif
+                            <x-petugas-sidebar :permissions="Auth::user()->role->permissions" />
 
                             {{-- ADMIN --}}
-                            @if(Auth::user()->role == 'admin')
-                            <li class="has-submenu {{ (request()->is('role*')) ? 'active' : '' }}">
-                                <a href="{{ url('/role') }}"><i class="mdi mdi-account-plus"></i>Role</a>
+                            <x-admin-sidebar :permissions="Auth::user()->role->permissions" />
+
+                            <li class="has-submenu {{ (request()->is('profile*')) ? 'active' : '' }}">
+                                <a href="#"><i class="mdi mdi-account"></i>Profile</a>
+                                <ul class="submenu megamenu">
+                                    <li>
+                                        <ul>
+                                            <li><a href="{{ url('/profile/edit-profile') }}">Edit profile</a></li>
+                                            <li><a href="{{ url('/profile/ganti-password') }}">Ganti Password</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
                             </li>
 
-                            <li class="has-submenu {{ (request()->is('laporan*')) ? 'active' : '' }}">
-                                <a href="{{ url('/laporan') }}"><i class="mdi mdi-file-chart"></i>Laporan</a>
-                            </li>
-                            @endif
-                            
 
                             <li class="has-submenu">
                                 <a href="#" onclick="$('#logout').submit();"><i class="mdi mdi-logout"></i>Keluar</a>
@@ -160,9 +93,9 @@
 
                         </ul>
 
-                    </div> 
-                </div> 
-            </div> 
+                    </div>
+                </div>
+            </div>
         </header>
 
         <div class="mt-4"></div>

@@ -26,14 +26,14 @@ Keluhan | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
         <div class="container-fluid">
             <div class="card">
                 <div class="card-body">
-                    @if(Auth::user()->role == 'pelanggan')
+                    @if ($insert = Auth::user()->role->permissions->contains('name', 'Tambah Keluhan'))
                     <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#tambah">Tambah Keluhan</button>
                     @endif
                     <div class="table-responsive">
@@ -48,7 +48,7 @@ Keluhan | Hippam Kaligondo
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
                     </div>
@@ -59,7 +59,7 @@ Keluhan | Hippam Kaligondo
 
 </div>
 
-@if(Auth::user()->role == 'pelanggan')
+@if($insert)
 <!-- modal tambah -->
 <div class="modal fade" id="tambah" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="tambahLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -124,16 +124,8 @@ Keluhan | Hippam Kaligondo
 @endsection
 
 @section('js')
-@if(Auth::user()->role == 'petugas')
-    <script>
-      var role = 'petugas';
-    </script>
-@else
-    <script>
-      var role = 'pelanggan';
-    </script>
-@endif
 <script>
+    let role = `{{ $insert ? 'pelanggan' : 'petugas' }}`
     $.ajaxSetup({
         headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -192,8 +184,6 @@ Keluhan | Hippam Kaligondo
     }
 
     function hapus(e) {
-        var url = 'keluhan/delete/'+e;
-
         swal({
             title             : "Apakah Anda Yakin ?",
             text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
@@ -204,7 +194,7 @@ Keluhan | Hippam Kaligondo
             confirmButtonText : "Ya, Tetap Hapus!"
         }).then((result) => {
             $.ajax({
-                url    : url,
+                url    : `{{ route('keluhan.destroy', ':id') }}`.replace(':id', e),
                 type   : "delete",
                 success: function(data) {
                     $('#table-1').DataTable().ajax.reload();

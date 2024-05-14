@@ -13,7 +13,7 @@ use Yajra\DataTables\DataTables;
 class RoleUserController extends Controller
 {
     /**
-     * Main view
+     * Main view tes
      */
     public function index(): View
     {

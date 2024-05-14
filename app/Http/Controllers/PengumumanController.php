@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengumuman;
-use Auth;
-use DataTables;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 use Illuminate\Http\Request;
-use Storage;
-use Validator;
+use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Validator;
 
 class PengumumanController extends Controller
 {

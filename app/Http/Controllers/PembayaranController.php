@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Yajra\DataTables\DataTables;
 
@@ -156,11 +157,45 @@ class PembayaranController extends Controller
         return response()->json('success', 200);
     }
 
+    // public function riwayat(Request $request): View
+    // {
+    //     $riwayat = Pembayaran::where('id_pelanggan', $request->user()->id)->where('tahun', date('Y'))->get();
+
+    //     return view('pembayaran.riwayat', compact(['riwayat']));
+    // }
+
     public function riwayat(Request $request): View
     {
-        $riwayat = Pembayaran::where('id_pelanggan', $request->user()->id)->where('tahun', date('Y'))->get();
+        $user = $request->user();
+        $riwayat = collect();
 
-        return view('pembayaran.riwayat', compact(['riwayat']));
+        return match ($user->role->name) {
+            'pelanggan' => $this->pelangganHistory($request->user()),
+            'ketuart' => $this->rtHistory($request->user()),
+            default => view('pembayaran.riwayat', compact('riwayat')),
+        };
+    }
+
+    protected function pelangganHistory(User $user): View
+    {
+        return view('pembayaran.riwayat', [
+            'riwayat' => $user->pembayarans()->where('tahun', date('Y'))->get(),
+        ]);
+    }
+
+    protected function rtHistory(User $user): View
+    {
+        return view('pembayaran.riwayat-rt', [
+            'riwayat' => Pembayaran::query()
+                ->whereHas(
+                    'user',
+                    fn (Builder $query) => $query->where('rt', $user->rt)->where('rw', $user->rw)
+                )
+                ->where('tahun', date('Y'))
+                ->orderBy('id_pelanggan')
+                ->orderBy('bulan')
+                ->get(),
+        ]);
     }
 
     public function uploadUlang(Request $request, $id): RedirectResponse
@@ -243,6 +278,42 @@ class PembayaranController extends Controller
             )->get();
 
         return DataTables::of($data)
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+    public function laporanBelumBayar(Request $request)
+    {
+        return view('pembayaran.laporan-belum-bayar', [
+            'months' => Bulan::cases(),
+        ]);
+    }
+
+    public function datatableBelumBayar(Request $request): JsonResponse
+    {
+        $date = (object) [
+            'bulan' => $request->bulan ?? Str::padLeft(now()->month, 2, 0),
+            'tahun' => $request->tahun ?? now()->year,
+        ];
+
+        return DataTables::of(
+            User::query()
+                ->latest()
+                ->whereYear('created_at', '<=', $date->tahun)
+                ->whereMonth('created_at', '<=', (int) $date->bulan)
+                ->whereHas(
+                    'role',
+                    fn (Builder $query): Builder => $query->where('name', 'pelanggan')
+                )
+                ->whereDoesntHave(
+                    'pembayarans',
+                    fn (Builder $query): Builder => $query->where(
+                        'bulan',
+                        $date->bulan
+                    )->where('tahun', $date->tahun)
+                        ->where('status', 'success')
+                )->get()
+        )
             ->addIndexColumn()
             ->make(true);
     }

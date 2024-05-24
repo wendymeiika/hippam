@@ -43,6 +43,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all of the replies for the User
+     */
+    public function replies(): HasMany
+    {
+        return $this->hasMany(Balasan::class, 'id_petugas');
+    }
+
+    /**
+     * Get all of the keluhans for the User
+     */
+    public function keluhans(): HasMany
+    {
+        return $this->hasMany(Keluhan::class, 'id_pelanggan');
+    }
+
+    /**
      * Get the role that owns the User
      */
     public function role(): BelongsTo

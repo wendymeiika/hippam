@@ -72,7 +72,7 @@
             </div>
 
             <div class="m-t-40 text-center">
-                <p class="text-muted">© 2022 Hippam Kaligondo</p>
+                <p class="text-muted">© 2024 Hippam Kaligondo</p>
             </div>
 
         </div>

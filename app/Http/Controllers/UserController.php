@@ -2,90 +2,73 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserFromPetugasRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Yajra\DataTables\DataTables;
 
 class UserController extends Controller
 {
-    public function user(): View
+    public function index(): View
     {
         return view('user.list-user');
     }
 
     public function userList(Request $request): JsonResponse
     {
-        $data = User::where('role', 'pelanggan')->orderBy('created_at', 'desc')->get();
-
-        return DataTables::of($data)
-            ->addIndexColumn()
+        return DataTables::of(
+            User::query()
+                ->latest()
+                ->whereHas('role', fn (Builder $query): Builder => $query->where('name', 'pelanggan'))
+                ->get()
+        )->addIndexColumn()
+            ->addColumn('deletable', fn (User $user) => Gate::check('delete', $user))
             ->make(true);
     }
 
-    public function tambahUser(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required',
-            'username' => 'required|unique:user',
-            'alamat' => 'required',
-            'rt' => 'required',
-            'rw' => 'required',
-            'tlp' => 'required|numeric|unique:user',
-        ]);
+        Role::query()
+            ->where('name', 'pelanggan')
+            ->first()
+            ->users()
+            ->create(
+                array_merge(
+                    $request->validated(),
+                    ['password' => $request->tlp]
+                )
+            );
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
+        return back()->with('success', 'Data Pelanggan berhasil ditambahkan.');
 
-        User::create([
-            'nama' => $request->nama,
-            'username' => $request->username,
-            'alamat' => $request->alamat,
-            'rt' => $request->rt,
-            'rw' => $request->rw,
-            'tlp' => $request->tlp,
-            'password' => $request->tlp,
-        ]);
     }
 
-    public function updateUser(Request $request, User $id)
+    public function update(UpdateUserFromPetugasRequest $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required',
-            'username' => ['required', Rule::unique(User::class, 'username')->ignore($id)],
-            'alamat' => 'required',
-            // 'rt' => 'required',
-            // 'rw' => 'required',
-            'telepon' => ['required', 'numeric', Rule::unique(User::class, 'tlp')->ignore($id)],
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $input = $request->except(['telepon', 'pass']);
-        $input['tlp'] = $request->telepon;
+        $update = $request->validated();
 
         if ($request->pass) {
-            $input['password'] = $request->telepon;
+            $update['password'] = $request->telepon;
         }
 
-        $id->update($input);
+        $user->update($update);
 
         return back()->with('success', 'Data Pelanggan berhasil diperbarui.');
     }
 
-    public function deleteUser(User $id): JsonResponse
+    public function destroy(User $user): JsonResponse
     {
-        $id->delete();
+        $user->delete();
 
-        return response()->json('success', 200);
+        return response()->json(status: 204);
     }
 
     public function editProfile(): View

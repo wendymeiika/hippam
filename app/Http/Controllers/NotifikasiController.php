@@ -25,6 +25,9 @@ class NotifikasiController extends Controller
             )->latest()
             ->get();
 
+        // Set it already read
+        Notifikasi::query()->whereIn('id', $data->pluck('id'))->update(['read' => 1]);
+
         return DataTables::of($data)
             ->addIndexColumn()
             ->make(true);

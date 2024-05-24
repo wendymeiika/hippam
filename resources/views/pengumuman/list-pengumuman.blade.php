@@ -24,7 +24,7 @@ Pengumuman | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -42,7 +42,7 @@ Pengumuman | Hippam Kaligondo
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
                     </div>
@@ -168,7 +168,7 @@ Pengumuman | Hippam Kaligondo
             orderable: false,
             render: function (data, type, full, meta) {
               var id_pengumuman = full['id'];
-              
+
               var aksi = (
                 '<div class="btn-group">' +
                   '<a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>' +

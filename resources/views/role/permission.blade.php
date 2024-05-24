@@ -177,7 +177,10 @@ Role Permission | Hippam Kaligondo
                             name: '${full.name}',
 							permissions: '${JSON.stringify(full.permissions.map((permission) => permission.id))}',
 						})">Edit</a>
-						<a href="javascript:;" class="dropdown-item delete-record" onclick="hapus(${full.id})">Hapus</a>
+						${full.deletable
+                        ? `<a href="javascript:;" class="dropdown-item delete-record" onclick="hapus(${full.id})">Hapus</a>`
+                        : ''
+                        }
 						</div>
 					</div>`
 				);
@@ -207,5 +210,33 @@ Role Permission | Hippam Kaligondo
 
 		$('#form_edit').attr('action', url);
 	}
+
+    const hapus = id => {
+        swal({
+            title             : "Apakah Anda Yakin ?",
+            text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
+            type              : "warning",
+            showCancelButton  : true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor : "#d33",
+            confirmButtonText : "Ya, Tetap Hapus!"
+        }).then((result) => {
+            $.ajax({
+                url    : `{{ route('role.destroy', ':id') }}`.replace(':id', id),
+                type   : "delete",
+                success: function(data) {
+                    $('#table-1').DataTable().ajax.reload();
+                    swal({
+                        type: 'success',
+                        title: 'Data Role Akses berhasil dihapus.',
+                        showConfirmButton: true,
+                        confirmButtonClass: 'btn btn-success',
+                    });
+                }
+            })
+        }).catch((failed) => {
+            console.error(failed)
+        })
+    }
 </script>
 @endsection

@@ -26,7 +26,6 @@ Keluhan | Hippam Kaligondo
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="page-content-wrapper">
@@ -40,11 +39,13 @@ Keluhan | Hippam Kaligondo
                         <table class="table table-striped" id="table-1">
                             <thead>
                                 <tr>
+                                    <th>Gambar</th>
+                                    {{-- <th>No. Telepon</th>
+                                    <th>Alamat</th> --}}
                                     <th>Nama</th>
-                                    <th>No. Telepon</th>
-                                    <th>Alamat</th>
-                                    <th>keluhan</th>
-                                    <th></th>
+                                    <th>Keluhan</th>
+                                    <th>Balasan Petugas</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,7 +72,7 @@ Keluhan | Hippam Kaligondo
         </button>
       </div>
       <div class="modal-body">
-            <form action="{{ url('/keluhan/tambah') }}" method="post">
+            <form action="{{ url('/keluhan/tambah') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="form-group">
                     <label for="">Keluhan</label>
@@ -80,11 +81,18 @@ Keluhan | Hippam Kaligondo
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="form-group">
+                    <label for="gambar">Gambar (<small>Maksimal 2 MB</small>)</label>
+                    <input name="gambar" type="file" accept="images/*" class="form-control @error('gambar') is-invalid @enderror" value="{{ old('gambar') }}" required>
+                    @error('gambar')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
             <button type="submit" class="btn btn-primary">Submit</button>
-             </form>
+        </form>
       </div>
     </div>
   </div>
@@ -102,9 +110,17 @@ Keluhan | Hippam Kaligondo
         </button>
       </div>
       <div class="modal-body">
-            <form id="form_edit" action="" method="post">
+            <form id="form_edit" action="" method="post" enctype="multipart/form-data">
                 @csrf
                 @method('put')
+                <div class="form-group" id="img-gambar"></div>
+                <div class="form-group">
+                    <label for="gambar">Gambar (<small>Maksimal 2 MB</small>)</label>
+                    <input name="gambar" type="file" accept="images/*" class="form-control @error('gambar') is-invalid @enderror">
+                    @error('gambar')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
                 <div class="form-group">
                     <label for="">Keluhan</label>
                     <textarea name="keluhan" class="form-control @error('keluhan') is-invalid @enderror" id="keluhan_edit" required></textarea>
@@ -121,6 +137,36 @@ Keluhan | Hippam Kaligondo
     </div>
   </div>
 </div>
+
+<!--balasan petugas-->
+<div class="modal fade" id="balasan" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="balasanLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="balasanLabel">Balas Keluhan</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="form_balasan" action="" method="post">
+                @csrf
+                <div class="form-group">
+                    <label for="balasan">Balasan</label>
+                    <textarea name="balasan" class="form-control @error('balasan') is-invalid @enderror" required>{{ old('balasan') }}</textarea>
+                    @error('balasan')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Kirim</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js')
@@ -140,21 +186,44 @@ Keluhan | Hippam Kaligondo
             url: "keluhan/list",
         },
         columns: [
+            { data: 'gambar', name: 'gambar' },
             { data: 'nama', name: 'nama' },
-            { data: 'tlp', name: 'tlp' },
-            { data: 'alamat', name: 'alamat' },
+            // { data: 'tlp', name: 'tlp' },
+            // { data: 'alamat', name: 'alamat' },
             { data: 'keluhan', name: 'keluhan' },
+            { data: 'balasan_petugas', name: 'balasan_petugas', orderable: false },
+
             { data: '', orderable: false },
         ],
         order: [[0, 'desc']],
         columnDefs: [
         {
+        targets: 0,
+        render: function (data, type, full, meta) {
+            var pathGambar = "{{ url('/storage/images/info') }}";
+            var gambar = pathGambar + '/' + full['gambar'];
+
+            var output = '<a href="'+ gambar +'" target="_blank"><img src="'+ gambar +'" class="img-fluid" /></a>';
+
+            return output;
+            }
+        },
+        {
           targets: -1,
           orderable: false,
           render: function (data, type, full, meta) {
             var id_keluhan = full['id'];
+            var role = '{{ $insert ? 'pelanggan' : 'petugas' }}';
             if(role == 'petugas') {
-              var aksi = 'Tidak ada aksi';
+              var aksi = (
+                '<div class="btn-group">' +
+                  '<a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>' +
+                  '<div class="dropdown-menu dropdown-menu-right">' +
+                  '<a href="javascript:;" class="dropdown-item" data-toggle="modal" data-target="#balasan" onclick="balas(this, '+ id_keluhan +')">Balas</a>' +
+                  '<a href="javascript:;" class="dropdown-item delete-record" onclick="hapus('+ id_keluhan +')">Hapus</a>' +
+                  '</div>' +
+                '</div>'
+              );
             } else {
               var aksi = (
                 '<div class="btn-group">' +
@@ -169,9 +238,33 @@ Keluhan | Hippam Kaligondo
 
             return aksi;
           }
-        }
+        },
+        // Tambah logika untuk menampilkan balasan
+        {
+                targets: 3, // Index kolom balasan
+                render: function (data, type, full, meta) {
+                    if (full['balasan'].length) {
+                        return `<ol>
+                            ${full['balasan'].map((reply) => `<li>${reply.balasan} - ${ setDate(reply.created_at) }</li>`).join('')}
+                        </ol>`
+                    }
+
+                    // Jika tidak ada balasan, tampilkan pesan ini
+                    return 'Belum ada balasan';
+                }
+            }
       ],
-    });
+    })
+
+    const formatter = new Intl.DateTimeFormat('id-ID', {
+        dateStyle: 'long',
+        timeStyle: 'short',
+        timeZone: 'Asia/Jakarta'
+    })
+
+    const setDate = date => {
+        return formatter.format(new Date(date));
+    }
 
     function edit(this_el, id_user) {
         var url = '/keluhan/update/'+id_user;
@@ -179,9 +272,22 @@ Keluhan | Hippam Kaligondo
         var row = $("#table-1").DataTable().row(tr_el);
         var row_data = row.data();
         console.log(row_data.email);
+
+        var pathGambar = "{{ url('/storage/images/info') }}";
+        var gambar = pathGambar + '/' + row_data.gambar;
+
+        var imgGambar = '<a href="'+ gambar +'" target="_blank"><img src="'+ gambar +'" class="mw-img-info" /></a>';
+
+        $('#img-gambar').html(imgGambar);
         $('#keluhan_edit').val(row_data.keluhan);
         $('#form_edit').attr('action', url);
     }
+
+
+    function balas(this_el, id_keluhan) {
+        $('#form_balasan').attr('action', '{{ route('keluhan.balas', ':id') }}'.replace(':id', id_keluhan));
+    }
+
 
     function hapus(e) {
         swal({

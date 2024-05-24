@@ -107,7 +107,7 @@
 
                 <div class="row">
                     <div class="col-12">
-                        2022 © Hippam Kaligondo</span>
+                        2024 © Hippam Kaligondo</span>
                     </div>
                 </div>
             </div>

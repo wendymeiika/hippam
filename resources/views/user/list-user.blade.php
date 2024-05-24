@@ -26,7 +26,7 @@ User | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -48,7 +48,7 @@ User | Hippam Kaligondo
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
                     </div>
@@ -70,7 +70,7 @@ User | Hippam Kaligondo
         </button>
       </div>
       <div class="modal-body">
-            <form action="{{ url('/user/tambah') }}" method="post">
+            <form action="{{ route('user.store') }}" method="post">
                 @csrf
                 <div class="form-group">
                     <label for="frist_name">Nama</label>
@@ -99,7 +99,7 @@ User | Hippam Kaligondo
                  <div class="row">
                   <div class="form-group col-6">
                     <label for="">RT</label>
-                    <input id="rt" type="number" class="form-control @error('rt') is-invalid @enderror" name="rt" value="{{ old('rt') }}" required>
+                    <input type="number" class="form-control @error('rt') is-invalid @enderror" name="rt" value="{{ old('rt') }}" required>
                     <div class="invalid-feedback"></div>
                     @error('rt')
                       <div class="invalid-feedback">{{ $message }}</div>
@@ -107,7 +107,7 @@ User | Hippam Kaligondo
                   </div>
                   <div class="form-group col-6">
                     <label for="last_name">RW</label>
-                    <input id="rw" type="number" class="form-control @error('rw') is-invalid @enderror" name="rw" value="{{ old('rw') }}" required>
+                    <input type="number" class="form-control @error('rw') is-invalid @enderror" name="rw" value="{{ old('rw') }}" required>
                     @error('rw')
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -163,8 +163,8 @@ User | Hippam Kaligondo
                     </div>
                     <div class="form-group col-6">
                       <label for="">No. Telepon</label>
-                      <input type="number" class="form-control @error('telepon') is-invalid @enderror" value="" id="telepon" name="telepon" required>
-                      @error('telepon')
+                      <input type="number" class="form-control @error('tlp') is-invalid @enderror" value="" id="tlp" name="tlp" required>
+                      @error('tlp')
                         <div class="invalid-feedback">{{ $message }}</div>
                       @enderror
                     </div>
@@ -222,8 +222,8 @@ User | Hippam Kaligondo
         processing: true,
         serverSide: true,
         ajax: {
-            type: 'POST',
-            url: "user/list",
+            type: 'GET',
+            url: "{{ route('user.list') }}",
         },
         columns: [
             { data: 'nama', name: 'nama' },
@@ -239,40 +239,38 @@ User | Hippam Kaligondo
         {
           targets: -1,
           orderable: false,
-          render: function (data, type, full, meta) {
-            var id_user = full['id'];
-            return (
-              '<div class="btn-group">' +
-                '<a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>' +
-                '<div class="dropdown-menu dropdown-menu-right">' +
-                '<a href="javascript:;" class="dropdown-item" data-toggle="modal" data-target="#edit" onclick="edit(this, '+ id_user +')">Edit</a>' +
-                '<a href="javascript:;" class="dropdown-item delete-record" onclick="hapus('+ id_user +')">Hapus</a>' +
-                '</div>' +
-              '</div>'
-            );
+          render: (data, type, full, meta) => {
+            return `<div class="btn-group">
+                <a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a href="javascript:;" class="dropdown-item" data-toggle="modal" data-target="#edit" onclick="edit(this, ${full.id})">Edit</a>
+                    ${full.deletable
+                        ? `<a href="javascript:;" class="dropdown-item delete-record" onclick="hapus(${full.id})">Hapus</a>`
+                        : ''
+                    }
+                </div>
+            </div>`
           }
         }
       ],
     });
 
-    function edit(this_el, id_user) {
-        var url = '/user/update/'+id_user;
-        var tr_el = this_el.closest('tr');
-        var row = $("#table-1").DataTable().row(tr_el);
-        var row_data = row.data();
-        console.log(row_data.email);
+    const edit = (this_el, id_user) => {
+        let url = `{{ route('user.update', ':id') }}`.replace(':id', id_user),
+            tr_el = this_el.closest('tr'),
+            row = $("#table-1").DataTable().row(tr_el),
+            row_data = row.data();
+
         $('#nama').val(row_data.nama);
         $('#username_edit').val(row_data.username);
-        $('#telepon').val(row_data.tlp);
+        $('#tlp').val(row_data.tlp);
         $('#alamat').val(row_data.alamat);
         $('#rt').val(row_data.rt);
         $('#rw').val(row_data.rw);
         $('#form_edit').attr('action', url);
     }
 
-    function hapus(e) {
-        var url = 'user/delete/'+e;
-
+    const hapus = id => {
         swal({
             title             : "Apakah Anda Yakin ?",
             text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
@@ -283,7 +281,7 @@ User | Hippam Kaligondo
             confirmButtonText : "Ya, Tetap Hapus!"
         }).then((result) => {
             $.ajax({
-                url    : url,
+                url    : `{{ route('user.destroy', ':id') }}`.replace(':id', id),
                 type   : "delete",
                 success: function(data) {
                     $('#table-1').DataTable().ajax.reload();
@@ -295,6 +293,8 @@ User | Hippam Kaligondo
                     });
                 }
             })
+        }).catch((failed) => {
+            console.error(failed)
         })
     }
 

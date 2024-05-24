@@ -33,6 +33,9 @@ class PermissionSeeder extends Seeder
             4 => collect([
                 (object) ['name' => 'Atur izin akses', 'roles' => [3]],
             ]),
+            5 => collect([
+                (object) ['name' => 'Tambah Pengaduan', 'roles' => [2, 4]],
+            ]),
         ]);
 
         Group::query()->get()->each(function (Group $group) use ($permissions) {

@@ -39,7 +39,7 @@ User | Hippam Kaligondo
                                     <th>Nama</th>
                                     <th>Username</th>
                                     <th>Role</th>
-                                    <th></th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -265,7 +265,7 @@ User | Hippam Kaligondo
 							alamat: '${full.alamat}',
 							rt: '${full.rt}',
 							rw: '${full.rw}',
-							role: '${full.role.id}',
+							role: '${full.role?.id ?? '-'}',
 						})">Edit</a>
 						<a href="javascript:;" class="dropdown-item delete-record" onclick="hapus(${full.id})">Hapus</a>
 						</div>
@@ -274,7 +274,7 @@ User | Hippam Kaligondo
 			}
 		}, {
             targets: -2,
-            render: (data, type, full, meta) => full.role.name
+            render: (data, type, full, meta) => full.role?.name ?? '-'
         }],
 	});
 

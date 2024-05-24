@@ -166,13 +166,10 @@ class PembayaranController extends Controller
 
     public function riwayat(Request $request): View
     {
-        $user = $request->user();
-        $riwayat = collect();
-
-        return match ($user->role->name) {
+        return match ($request->user()->role->name) {
             'pelanggan' => $this->pelangganHistory($request->user()),
             'ketuart' => $this->rtHistory($request->user()),
-            default => view('pembayaran.riwayat', compact('riwayat')),
+            default => view('pembayaran.riwayat', ['riwayat' => collect([])]),
         };
     }
 

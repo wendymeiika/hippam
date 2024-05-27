@@ -5,6 +5,11 @@ Home | Hippam Kaligondo
 @endsection
 
 @section('content')
+<style>
+    .carousel-caption {
+        color: #000000;
+    }
+</style>
 <div class="wrapper">
     <div class="page-title-box">
         <div class="container-fluid">
@@ -15,7 +20,6 @@ Home | Hippam Kaligondo
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="page-content-wrapper">
@@ -23,7 +27,26 @@ Home | Hippam Kaligondo
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-12 col-md-6 col-lg-6">
+                        <div class="col-12">
+                            @if (Auth::user()->role->name == 'admin')
+                            <div class="d-flex justify-content-center">
+                                <div class="card text-white bg-success mb-3 mx-2" style="max-width: 15rem;">
+                                    <div class="card-header"><h4 class="card-title text-center">Pelanggan Sudah Bayar</h4></div>
+                                    <div class="card-body"><h3 class="card-text text-center">{{ $sudah }} orang</h3></div>
+                                </div>
+                                <div class="card text-white bg-info mb-3 mx-2" style="max-width: 15rem;">
+                                    <div class="card-header"><h4 class="card-title text-center">Total <br>Pelanggan</h4></div>
+                                    <div class="card-body"><h3 class="card-text text-center">{{ $total }} orang</h3></div>
+                                </div>
+                                <div class="card text-white bg-primary mb-3 mx-2" style="max-width: 15rem;">
+                                    <div class="card-header"><h4 class="card-title text-center">Pelanggan Belum Bayar</h4></div>
+                                    <div class="card-body"><h3 class="card-text text-center">{{ $belum }} orang</h3></div>
+                                </div>
+                            </div>
+                            @endif
+
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-6 mt-3">
                             <h5 class="text-capitalize">Info {{ Auth::user()->role?->name }}</h5>
                             <hr>
                             <div class="card directory-card m-b-20">
@@ -47,18 +70,18 @@ Home | Hippam Kaligondo
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6 col-lg-6">
+                        <div class="col-12 col-md-6 col-lg-6 mt-3">
                             <h5>Pengumuman</h5>
                             @if(count($info))
                             <div id="info-poster" class="carousel slide" data-ride="carousel">
                                 <div class="carousel-inner" role="listbox">
                                     @foreach($info as $i)
                                     <div class="carousel-item {{ ($loop->first) ? 'active' : '' }}">
-                                        <img src="{{ url('/storage/images/info/'.$i->poster) }}" class="d-block w-100" alt="Pengumuman">
-                                        <div class="carousel-caption d-none d-md-block">
+                                        <div class="text-center mb-4">
                                             <h5>Deskripsi</h5>
                                             <p>{{ $i->deskripsi }}</p>
                                         </div>
+                                        <img src="{{ url('/storage/images/info/'.$i->poster) }}" class="d-block w-100" alt="Pengumuman">
                                     </div>
                                     @endforeach
                                 </div>
@@ -82,6 +105,5 @@ Home | Hippam Kaligondo
             </div>
         </div>
     </div>
-
 </div>
 @endsection

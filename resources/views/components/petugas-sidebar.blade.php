@@ -1,4 +1,4 @@
-@if ($permissions?->contains('name', 'Tambah Pelanggan'))
+@if ($permissions?->contains('name', 'Validasi'))
 <li class="has-submenu {{ (request()->is('user*')) ? 'active' : '' }}">
     <a href="{{ url('/user') }}"><i class="mdi mdi-account-plus"></i>User</a>
 </li>
@@ -10,10 +10,8 @@
 </li>
 @endif
 
-@if ($permissions?->contains('name', 'Baca Notifikasi'))
-<li class="has-submenu {{ (request()->is('notifikasi*')) ? 'active' : '' }}">
-    <a href="{{ url('/notifikasi') }}"><i class="mdi mdi-bell"></i>Notifikasi</a>
-</li>
+@if ($permissions?->contains('name', 'Validasi'))
+<x-notification-navbar />
 @endif
 
 @if ($permissions?->contains('name', 'Tambah Pengumuman'))
@@ -22,9 +20,23 @@
 </li>
 @endif
 
-@if ($permissions?->contains('name', 'Baca Seluruh Riwayat'))
+{{-- @if ($permissions?->contains('name', 'Baca Seluruh Riwayat'))
 <li class="has-submenu {{ (request()->is('laporan*')) ? 'active' : '' }}">
     <a href="{{ url('/laporan') }}"><i class="mdi mdi-file-chart"></i>Laporan</a>
+</li>
+@endif --}}
+
+@if ($permissions?->contains('name', 'Baca Seluruh Riwayat'))
+<li class="has-submenu {{ (request()->is('laporan*')) ? 'active' : '' }}">
+    <a href="#"><i class="mdi mdi-file-chart"></i>Laporan</a>
+    <ul class="submenu megamenu">
+        <li>
+            <ul>
+                <li><a href="{{ url('/laporan') }}">Laporan Sudah Bayar</a></li>
+                <li><a href="{{ url('/laporan/list-belum-bayar') }}">Laporan Belum Bayar</a></li>
+            </ul>
+        </li>
+    </ul>
 </li>
 @endif
 

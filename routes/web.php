@@ -35,11 +35,14 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/ganti-password', [UserController::class, 'updatePassword']);
 
     // keluhan
-    Route::get('/keluhan', [KeluhanController::class, 'index'])->name('keluhan.index');
-    Route::post('/keluhan/list', [KeluhanController::class, 'keluhanList']);
-    Route::post('/keluhan/tambah', [KeluhanController::class, 'tambah']);
-    Route::put('/keluhan/update/{id}', [KeluhanController::class, 'update']);
-    Route::delete('/keluhan/{id}', [KeluhanController::class, 'delete'])->name('keluhan.destroy');
+    Route::controller(KeluhanController::class)->prefix('keluhan')->name('keluhan.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/list', 'keluhanList');
+        Route::post('/tambah', 'tambah');
+        Route::put('/update/{id}', 'update');
+        Route::delete('/{id}', 'delete')->name('destroy');
+        Route::post('/balasan/{keluhan}', 'balas')->name('balas');
+    });
 
     // pembayaran
     Route::prefix('pembayaran')->name('pembayaran.')->controller(PembayaranController::class)->group(function () {
@@ -69,11 +72,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['petugas'])->group(function () {
         // user
-        Route::get('/user', [UserController::class, 'user']);
-        Route::post('/user/list', [UserController::class, 'userList']);
-        Route::post('/user/tambah', [UserController::class, 'tambahUser']);
-        Route::put('/user/update/{id}', [UserController::class, 'updateUser']);
-        Route::delete('/user/delete/{id}', [UserController::class, 'deleteUser']);
+        Route::get('user/list', [UserController::class, 'userList'])->name('user.list');
+        Route::resource('user', UserController::class)->except(['create', 'show', 'edit']);
 
         // pengumuman
         Route::get('/pengumuman', [PengumumanController::class, 'index']);
@@ -81,12 +81,19 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pengumuman/tambah', [PengumumanController::class, 'tambah']);
         Route::put('/pengumuman/update/{id}', [PengumumanController::class, 'update']);
         Route::delete('/pengumuman/delete/{id}', [PengumumanController::class, 'delete']);
+
     });
 
     // laporan
-    Route::post('/laporan/list', [PembayaranController::class, 'listLaporan']);
-    Route::get('/laporan', [PembayaranController::class, 'laporan']);
-    Route::post('/laporan', [PembayaranController::class, 'laporan']);
+    Route::controller(PembayaranController::class)->prefix('laporan')->name('laporan.')->group(function () {
+        Route::post('list', 'listLaporan');
+        Route::get('/', 'laporan');
+        Route::post('/', 'laporan');
+
+        // laporan belum bayar
+        Route::get('/list-belum-bayar', 'laporanBelumBayar')->name('belum-bayar');
+        Route::get('/list-belum-bayar/datatable', 'datatableBelumBayar')->name('belum-bayar.datatable');
+    });
 
     // atur role
     Route::get('role/datatable', [RoleController::class, 'datatable'])->name('role.datatable');

@@ -55,9 +55,9 @@ class RolePolicy
      *
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Role $role)
+    public function delete(User $user, Role $role): bool
     {
-        //
+        return $role->users()->doesntExist();
     }
 
     /**

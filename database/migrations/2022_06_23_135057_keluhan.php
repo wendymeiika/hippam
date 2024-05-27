@@ -20,6 +20,7 @@ class Keluhan extends Migration
             $table->string('tlp');
             $table->string('alamat');
             $table->text('keluhan');
+            $table->string('gambar');
             $table->boolean('read')->default(false);
             $table->timestamps();
         });

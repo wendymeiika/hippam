@@ -6,6 +6,8 @@ use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use App\Models\Group;
 use App\Models\Role;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Yajra\DataTables\DataTables;
 
@@ -86,9 +88,14 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Role $role)
+    public function destroy(Role $role): JsonResponse
     {
-        //
+        Gate::authorize('delete', $role);
+
+        $role->delete();
+
+        return response()->json(status: 204);
+        // return redirect()->route('role.index')->with('success', __('Role telah diperbarui'));
     }
 
     /**
@@ -99,6 +106,7 @@ class RoleController extends Controller
         return DataTables::of(
             Role::query()->with('permissions')->get()
         )->addIndexColumn()
+            ->addColumn('deletable', fn (Role $role) => Gate::check('delete', $role))
             ->make(true);
     }
 }

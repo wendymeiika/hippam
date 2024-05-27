@@ -19,6 +19,7 @@ class GroupSeeder extends Seeder
             ['name' => 'Pengumuman', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Keluhan', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Administrasi', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Pengaduan', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

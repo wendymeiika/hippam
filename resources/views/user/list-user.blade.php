@@ -273,7 +273,7 @@ User | Hippam Kaligondo
     const hapus = id => {
         swal({
             title             : "Apakah Anda Yakin ?",
-            text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
+            text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan paham!",
             type              : "warning",
             showCancelButton  : true,
             confirmButtonColor: "#3085d6",

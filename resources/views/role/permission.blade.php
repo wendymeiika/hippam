@@ -238,5 +238,5 @@ Role Permission | Hippam Kaligondo
             console.error(failed)
         })
     }
-</script>
+</script> 
 @endsection

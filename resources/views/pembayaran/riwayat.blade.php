@@ -12,7 +12,7 @@ Riwayat | Hippam Kaligondo
     @media print
     {
         .non-printable { visibility: hidden; }
-        #printable { 
+        #printable {
             visibility: visible;
         }
     }
@@ -35,7 +35,7 @@ Riwayat | Hippam Kaligondo
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -53,7 +53,7 @@ Riwayat | Hippam Kaligondo
                                     <span class="badge badge-warning badge-pill text-uppercase">waiting</span>
                                 </div>
                                 <div class="col-10">
-                                    Menunggu validasi dari Admin.
+                                    Menunggu validasi dari Petugas.
                                 </div>
                             </div>
                             <div class="row">
@@ -61,7 +61,7 @@ Riwayat | Hippam Kaligondo
                                     <span class="badge badge-primary badge-pill text-uppercase">reject</span>
                                 </div>
                                 <div class="col-10">
-                                    Bukti pembayaran ditolak oleh Admin. Silahkan upload ulang bukti yang benar.
+                                    Bukti pembayaran ditolak oleh Petugas. Silahkan upload ulang bukti yang benar.
                                 </div>
                             </div>
                             <div class="row">
@@ -69,7 +69,7 @@ Riwayat | Hippam Kaligondo
                                     <span class="badge badge-success badge-pill text-uppercase">success</span>
                                 </div>
                                 <div class="col-10">
-                                    Sudah divalidasi oleh Admin. Pembayaran valid.
+                                    Sudah divalidasi oleh Petugas. Pembayaran valid.
                                 </div>
                             </div>
                         </div>
@@ -109,7 +109,7 @@ Riwayat | Hippam Kaligondo
                                 </div>
                                 @endforeach
                             </ul>
-                            
+
                         </div>
                     </div>
                 </div>

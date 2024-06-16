@@ -104,35 +104,83 @@ class PembayaranController extends Controller
         return back()->with('success', 'Pembayaran berhasil, tunggu validasi admin.');
     }
 
+    // public function bayarHippamByRT(StoreHippamRTRequest $request)
+    // {
+    //     $request->pelanggan->pembayarans()->create([
+    //         'bulan' => $request->bulan,
+    //         'tahun' => date('Y'),
+    //         'status' => 'waiting',
+    //         'nama' => $request->pelanggan->nama,
+    //         'tlp' => $request->pelanggan->tlp,
+    //         'alamat' => $request->pelanggan->alamat,
+    //     ]);
+
+    //     $request->pelanggan->notifications()->create([
+    //         'nama' => $request->pelanggan->nama,
+    //         'tlp' => $request->pelanggan->tlp,
+    //         'type' => 'pembayaran',
+    //         'pesan' => 'Pembayaran hippam bulan '.Bulan::from($request->bulan)->name.' '.date('Y').' telah diproses oleh Ketua RT.',
+    //         'petugas' => $request->user()->id, // ID Ketua RT yang masuk
+    //     ]);
+
+    //     return back()->with('success', 'Pembayaran berhasil diproses.');
+
+    //     // menampilkan bulan user durung bayar
+    //     // User::query()
+    //     //     ->where('rt', Auth::user()->rt)
+    //     //     ->where('rw', Auth::user()->rw)
+    //     //     ->whereDoesntHave(
+    //     //         'pembayarans',
+    //     //         fn (Builder $query) => $query->where('bulan', date('m'))->where('tahun', date('Y'))
+    //     //     )-get();
+    // }
+
     public function bayarHippamByRT(StoreHippamRTRequest $request)
     {
-        $request->pelanggan->pembayarans()->create([
+        // Ambil pelanggan berdasarkan ID yang dikirim dari form
+        $pelanggan = User::find($request->id_pelanggan);
+
+        if (!$pelanggan) {
+            return back()->with('error', 'Pelanggan tidak ditemukan.');
+        }
+
+        // Lakukan validasi tambahan jika diperlukan
+        if ($pelanggan->rt != $request->user()->rt || $pelanggan->rw != $request->user()->rw) {
+            return back()->with('error', 'Pelanggan tidak berada di RT/RW yang sama.');
+        }
+
+        // Cek apakah pembayaran sudah ada
+        $tahun_sekarang = date('Y');
+        $check_pembayaran = Pembayaran::query()
+            ->where('id_pelanggan', $pelanggan->id)
+            ->where('tahun', $tahun_sekarang)
+            ->where('bulan', $request->bulan)
+            ->exists();
+
+        if ($check_pembayaran) {
+            return back()->with('error', 'Pembayaran sudah dilakukan, lihat di riwayat.');
+        }
+
+        // Proses pembayaran
+        $pelanggan->pembayarans()->create([
             'bulan' => $request->bulan,
-            'tahun' => date('Y'),
+            'tahun' => $tahun_sekarang,
             'status' => 'waiting',
-            'nama' => $request->pelanggan->nama,
-            'tlp' => $request->pelanggan->tlp,
-            'alamat' => $request->pelanggan->alamat,
+            'nama' => $pelanggan->nama,
+            'tlp' => $pelanggan->tlp,
+            'alamat' => $pelanggan->alamat,
         ]);
 
-        $request->pelanggan->notifications()->create([
-            'nama' => $request->pelanggan->nama,
-            'tlp' => $request->pelanggan->tlp,
+        // Buat notifikasi
+        $pelanggan->notifications()->create([
+            'nama' => $pelanggan->nama,
+            'tlp' => $pelanggan->tlp,
             'type' => 'pembayaran',
-            'pesan' => 'Pembayaran hippam bulan '.Bulan::from($request->bulan)->name.' '.date('Y').' telah diproses oleh Ketua RT.',
+            'pesan' => 'Pembayaran hippam bulan ' . Bulan::from($request->bulan)->name . ' ' . date('Y') . ' telah diproses oleh Ketua RT.',
             'petugas' => $request->user()->id, // ID Ketua RT yang masuk
         ]);
 
         return back()->with('success', 'Pembayaran berhasil diproses.');
-
-        // menampilkan bulan user durung bayar
-        // User::query()
-        //     ->where('rt', Auth::user()->rt)
-        //     ->where('rw', Auth::user()->rw)
-        //     ->whereDoesntHave(
-        //         'pembayarans',
-        //         fn (Builder $query) => $query->where('bulan', date('m'))->where('tahun', date('Y'))
-        //     )-get();
     }
 
     public function validating(UpdatePembayaranValidationRequest $request, Pembayaran $pembayaran)

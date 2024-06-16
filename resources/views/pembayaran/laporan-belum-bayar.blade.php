@@ -12,7 +12,7 @@ Laporan | Hippam Kaligondo
             <div class="row">
                 <div class="col-sm-12">
                     <h4 class="page-title">Laporan</h4>
-                    <p>Laporan Pembayaran</p>
+                    <p>Laporan Pembayaran Pelanggan Belum Bayar</p>
                 </div>
             </div>
         </div>

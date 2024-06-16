@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\JsonResponse;
 
 class RoleUserController extends Controller
 {
@@ -70,8 +72,21 @@ class RoleUserController extends Controller
         return back()->with('success', 'Data role berhasil diperbarui.');
     }
 
-    public function destroy(User $roleUser)
-    {
+    // public function destroy(User $roleUser)
+    // {
+    //     try {
+    //         $roleUser->delete();
+    //         return response()->json(['success' => 'Data role berhasil dihapus.']);
+    //     } catch (Exception $e) {
+    //         return response()->json(['error' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage()], 500);
+    //     }
+    // }
 
+    public function destroy(User $roleUser): JsonResponse
+    {
+        $roleUser->delete();
+
+        return response()->json(status: 204);
     }
+
 }

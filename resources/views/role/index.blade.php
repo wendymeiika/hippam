@@ -290,5 +290,33 @@ User | Hippam Kaligondo
 		$('#form_edit select[name="role_id"]').val(user.role);
 		$('#form_edit').attr('action', url);
 	}
+
+    const hapus = id => {
+        swal({
+            title             : "Apakah Anda Yakin waaaa?",
+            text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
+            type              : "warning",
+            showCancelButton  : true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor : "#d33",
+            confirmButtonText : "Ya, Tetap Hapus!"
+        }).then((result) => {
+            $.ajax({
+                url    : `{{ route('role-user.destroy', ':id') }}`.replace(':id', id),
+                type   : "delete",
+                success: function(data) {
+                    $('#table-1').DataTable().ajax.reload();
+                    swal({
+                        type: 'success',
+                        title: 'Data Pelanggan berhasil dihapus.',
+                        showConfirmButton: true,
+                        confirmButtonClass: 'btn btn-success',
+                    });
+                }
+            })
+        }).catch((failed) => {
+            console.error(failed)
+        })
+    }
 </script>
 @endsection

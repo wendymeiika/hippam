@@ -46,7 +46,7 @@ class RoleController extends Controller
 
         $role->permissions()->sync($request->permissions);
 
-        return redirect()->route('role.index')->with('success', __('Role telah ditambahkan'));
+        return redirect()->route('role.index')->with('success', __('Role telah ditambahkannn'));
     }
 
     /**

@@ -76,15 +76,19 @@ Pembayaran | Hippam Kaligondo
         order: [[0, 'desc']],
         columnDefs: [
         {
-          targets: 3,
-            render: function (data, type, full, meta) {
-              var path = "{{ url('/storage/images/bukti') }}";
-              var bukti = path + '/' + full['bukti'];
+            targets: 3,
+                render: function (data, type, full, meta) {
+                    if (full['bukti']) {
+                        var path = "{{ url('/storage/images/bukti') }}";
+                        var bukti = path + '/' + full['bukti'];
 
-              var output = '<a href="'+ bukti +'" target="_blank"><img src="'+ bukti +'" class="img-fluid" /></a>';
+                        var output = '<a href="'+ bukti +'" target="_blank"><img src="'+ bukti +'" class="img-fluid" /></a>';
+                    } else {
+                        var output = '<h6>Pembayaran dibantu oleh Ketua RT</h6>';
+                    }
 
-              return output;
-            }
+                    return output;
+                }
         },
         {
           targets: 4,

@@ -11,6 +11,20 @@ Keluhan | Hippam Kaligondo
         height: 20px;
         margin-top: 10px;
     }
+    #img-gambar img {
+        max-width: 100%; /* Memastikan gambar tidak melebihi lebar kontainer */
+        height: auto; /* Mempertahankan aspek rasio gambar */
+        max-height: 200px; /* Batasi tinggi maksimum gambar */
+        display: block;
+        margin: 0 auto; /* Center gambar */
+    }
+    .mw-img-info {
+        max-width: 100%; /* Memastikan gambar tidak melebihi lebar kontainer */
+        height: auto; /* Mempertahankan aspek rasio gambar */
+        max-height: 200px; /* Batasi tinggi maksimum gambar */
+        display: block;
+        margin: 0 auto; /* Center gambar */
+    }
 </style>
 @endsection
 
@@ -39,7 +53,7 @@ Keluhan | Hippam Kaligondo
                         <table class="table table-striped" id="table-1">
                             <thead>
                                 <tr>
-                                    <th>Gambar</th>
+                                    <th style="width: 15%">Gambar</th>
                                     {{-- <th>No. Telepon</th>
                                     <th>Alamat</th> --}}
                                     <th>Nama</th>
@@ -91,7 +105,7 @@ Keluhan | Hippam Kaligondo
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Kirim</button>
         </form>
       </div>
     </div>
@@ -250,7 +264,7 @@ Keluhan | Hippam Kaligondo
                     }
 
                     // Jika tidak ada balasan, tampilkan pesan ini
-                    return 'Belum ada balasan';
+                     return `<span class="badge rounded-pill bg-primary text-white">Belum ada Balasan</span>`;
                 }
             }
       ],

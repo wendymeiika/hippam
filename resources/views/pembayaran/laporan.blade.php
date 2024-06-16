@@ -8,15 +8,13 @@ Laporan | Hippam Kaligondo
 <div class="wrapper">
     <div class="page-title-box">
         <div class="container-fluid">
-
             <div class="row">
                 <div class="col-sm-12">
                     <h4 class="page-title">Laporan</h4>
-                    <p>Laporan Pembayaran</p>
+                    <p>Laporan Pembayaran Sukses</p>
                 </div>
             </div>
         </div>
-    
     </div>
 
     <div class="page-content-wrapper">
@@ -38,7 +36,6 @@ Laporan | Hippam Kaligondo
                                   <input type="date" name="sampai" class="form-control" value="{{ $sampai }}" required>
                                 </div>
                             </div>
-                        
                             <div class="col-md-2 d-flex align-items-center">
                                 <button type="submit" class="btn btn-primary d-inline">Tampilkan</button>
                             </div>
@@ -58,29 +55,31 @@ Laporan | Hippam Kaligondo
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <h6>Total Pembayaran: Rp <span id="totalPembayaran">0</span></h6>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 @endsection
 
 @section('js')
 @if(isset($dari) && isset($sampai))
     <script>
-        var dari = "<?= $dari; ?>"; 
+        var dari = "<?= $dari; ?>";
         var sampai = "<?= $sampai; ?>"
         console.log(dari);
         console.log(sampai);
     </script>
 @else
     <script>
-        var dari = null; 
+        var dari = null;
         var sampai = null;
     </script>
 @endif
@@ -94,7 +93,9 @@ Laporan | Hippam Kaligondo
       });
 
       let _token   = $('meta[name="csrf-token"]').attr('content');
-    
+
+      let totalPembayaran = 0;
+
       $("#table-1").dataTable({
           processing: true,
           serverSide: true,
@@ -105,6 +106,12 @@ Laporan | Hippam Kaligondo
                 dari: dari,
                 sampai: sampai,
                 _token: _token
+              },
+              dataSrc: function(json) {
+                  // Perhitungan total pembayaran
+                  totalPembayaran = json.data.length * 10000;
+                  $('#totalPembayaran').text(totalPembayaran.toLocaleString('id-ID'));
+                  return json.data;
               }
           },
           columns: [
@@ -122,9 +129,9 @@ Laporan | Hippam Kaligondo
               render: function (data, type, full, meta) {
                 var bulan = toMonthName(parseInt(full['bulan']));
                 var tahun = parseInt(full['tahun']);
-    
+
                 var output = `<h6 class='w-100 mx-auto font-weight-bold'>${bulan} ${tahun}</h6>`;
-    
+
                 return output;
               }
           },
@@ -132,9 +139,9 @@ Laporan | Hippam Kaligondo
             targets: 4,
               render: function (data, type, full, meta) {
                 var status = full['status'];
-    
+
                 var output = `<h6 class='text-uppercase'>${status}</h6>`;
-    
+
                 return output;
               }
           },
@@ -144,16 +151,9 @@ Laporan | Hippam Kaligondo
                 var tgl_bayar = full['updated_at'];
                 tgl_bayar = new Date(tgl_bayar);
                 tgl_bayar = moment(tgl_bayar).format('DD-MM-YYYY HH:mm');
-    
-                // var tgl = tgl_bayar.getDay();
-                // var bulan = tgl_bayar.getMonth();
-                // bulan = toMonthName(bulan);
-                // var tahun = tgl_bayar.getFullYear();
-    
-                // var tanggal_bayar = tgl + ' ' + bulan + ' ' + tahun;
-    
+
                 var output = `<h6 class='text-uppercase'>${tgl_bayar}</h6>`;
-    
+
                 return output;
               }
           }
@@ -169,7 +169,7 @@ Laporan | Hippam Kaligondo
             }
           ]
       }).container().appendTo($('#export'));
-      
+
     });
 
 </script>

@@ -147,7 +147,7 @@ Pembayaran | Hippam Kaligondo
                     $('#table-1').DataTable().ajax.reload();
                     swal({
                         type: 'success',
-                        title: 'Data Pembayaran berhasil tersimpan.',
+                        title: 'Data Pembayaran berhasil divalidasi.',
                         showConfirmButton: true,
                         confirmButtonClass: 'btn btn-success',
                     });

@@ -12,11 +12,11 @@ Bayar | Hippam Kaligondo
             <div class="row">
                 <div class="col-sm-12">
                     <h4 class="page-title">Bayar</h4>
-                    <p>Form Pembayaran</p>
+                    <p>Form Pembayaran Mandiri Pelanggan</p>
                 </div>
             </div>
         </div>
-    
+
     </div>
 
     <div class="page-content-wrapper">
@@ -78,3 +78,4 @@ Bayar | Hippam Kaligondo
 <script src="{{ asset('plugins/bootstrap-filestyle/js/bootstrap-filestyle.min.js') }}"></script>
 
 @endsection
+

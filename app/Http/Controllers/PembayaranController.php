@@ -101,39 +101,9 @@ class PembayaranController extends Controller
             'petugas' => 1,
         ]);
 
-        return back()->with('success', 'Pembayaran berhasil, tunggu validasi admin.');
+        return back()->with('success', 'Pembayaran berhasil, tunggu validasi petugas.');
     }
 
-    // public function bayarHippamByRT(StoreHippamRTRequest $request)
-    // {
-    //     $request->pelanggan->pembayarans()->create([
-    //         'bulan' => $request->bulan,
-    //         'tahun' => date('Y'),
-    //         'status' => 'waiting',
-    //         'nama' => $request->pelanggan->nama,
-    //         'tlp' => $request->pelanggan->tlp,
-    //         'alamat' => $request->pelanggan->alamat,
-    //     ]);
-
-    //     $request->pelanggan->notifications()->create([
-    //         'nama' => $request->pelanggan->nama,
-    //         'tlp' => $request->pelanggan->tlp,
-    //         'type' => 'pembayaran',
-    //         'pesan' => 'Pembayaran hippam bulan '.Bulan::from($request->bulan)->name.' '.date('Y').' telah diproses oleh Ketua RT.',
-    //         'petugas' => $request->user()->id, // ID Ketua RT yang masuk
-    //     ]);
-
-    //     return back()->with('success', 'Pembayaran berhasil diproses.');
-
-    //     // menampilkan bulan user durung bayar
-    //     // User::query()
-    //     //     ->where('rt', Auth::user()->rt)
-    //     //     ->where('rw', Auth::user()->rw)
-    //     //     ->whereDoesntHave(
-    //     //         'pembayarans',
-    //     //         fn (Builder $query) => $query->where('bulan', date('m'))->where('tahun', date('Y'))
-    //     //     )-get();
-    // }
 
     public function bayarHippamByRT(StoreHippamRTRequest $request)
     {
@@ -180,7 +150,7 @@ class PembayaranController extends Controller
             'petugas' => $request->user()->id, // ID Ketua RT yang masuk
         ]);
 
-        return back()->with('success', 'Pembayaran berhasil diproses.');
+        return back()->with('success', 'Pembayaran berhasil, tunggu validasi petugas.');
     }
 
     public function validating(UpdatePembayaranValidationRequest $request, Pembayaran $pembayaran)
@@ -205,12 +175,6 @@ class PembayaranController extends Controller
         return response()->json('success', 200);
     }
 
-    // public function riwayat(Request $request): View
-    // {
-    //     $riwayat = Pembayaran::where('id_pelanggan', $request->user()->id)->where('tahun', date('Y'))->get();
-
-    //     return view('pembayaran.riwayat', compact(['riwayat']));
-    // }
 
     public function riwayat(Request $request): View
     {

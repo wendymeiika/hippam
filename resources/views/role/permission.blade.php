@@ -73,8 +73,8 @@ Role Permission | Hippam Kaligondo
                         <div class="row">
                             @foreach ($group->permissions as $permission)
                             <div class="form-check">
-                                <input class="form-check-input me-1" type="checkbox" value="{{ $permission->id }}" id="check-{{ $permission->id }}" name="permissions[]">
-                                <label class="form-check-label" for="check-{{ $permission->id }}">{{ $permission->name }}</label>
+                                <h6><input class="form-check-input me-1" type="checkbox" value="{{ $permission->id }}" id="check-{{ $permission->id }}" name="permissions[]"></h6>
+                                <h6><label class="form-check-label badge rounded-pill bg-primary text-white" for="check-{{ $permission->id }}">{{ $permission->name }}</label></h6>
                             </div>
                             @endforeach
                         </div>
@@ -125,7 +125,7 @@ Role Permission | Hippam Kaligondo
                             @foreach ($group->permissions as $permission)
                             <div class="form-check">
                                 <input class="form-check-input me-1" type="checkbox" value="{{ $permission->id }}" id="edit-{{ $permission->id }}" name="permissions[]">
-                                <label class="form-check-label" for="edit-{{ $permission->id }}">{{ $permission->name }}</label>
+                                <label class="form-check-label badge rounded-pill bg-primary text-white" for="edit-{{ $permission->id }}">{{ $permission->name }}</label>
                             </div>
                             @endforeach
                         </div>
@@ -189,7 +189,8 @@ Role Permission | Hippam Kaligondo
             targets: -2,
             render: (data, type, full, meta) => {
                 return `<ol class="list-disc">
-                    ${full.permissions.map((permission) => `<li>${permission.name}</li>`).join('')}
+                    ${full.permissions.map((permission) => `<h6><span class="badge rounded-pill bg-primary text-white"> ${permission.name}</span></h6>`).join(' ')}
+
                 </ol>`
             }
         }],
@@ -228,7 +229,7 @@ Role Permission | Hippam Kaligondo
                     $('#table-1').DataTable().ajax.reload();
                     swal({
                         type: 'success',
-                        title: 'Data Role Akses berhasil dihapus.',
+                        title: 'Data Hak Akses berhasil dihapus.',
                         showConfirmButton: true,
                         confirmButtonClass: 'btn btn-success',
                     });
@@ -238,5 +239,5 @@ Role Permission | Hippam Kaligondo
             console.error(failed)
         })
     }
-</script> 
+</script>
 @endsection

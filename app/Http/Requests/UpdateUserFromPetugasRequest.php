@@ -29,7 +29,7 @@ class UpdateUserFromPetugasRequest extends FormRequest
             'alamat' => 'required',
             'rt' => 'required|string',
             'rw' => 'required|string',
-            'tlp' => ['required', 'numeric', Rule::unique(User::class, 'tlp')->ignore($this->user)],
+            'tlp' => ['required', 'digits:12', Rule::unique(User::class, 'tlp')->ignore($this->user)],
         ];
     }
 }

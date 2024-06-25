@@ -29,7 +29,7 @@ class StoreUserRequest extends FormRequest
             'alamat' => 'required',
             'rt' => 'required',
             'rw' => 'required',
-            'tlp' => ['required', 'numeric', Rule::unique(User::class, 'tlp')],
+            'tlp' => ['required', 'digits:12', Rule::unique(User::class, 'tlp')],
         ];
     }
 }

@@ -83,7 +83,7 @@ User | Hippam Kaligondo
                         </div>
                         <div class="form-group col-6">
                             <label for="last_name">No. Telepon</label>
-                            <input type="number" class="form-control @error('tlp') is-invalid @enderror" value="{{ old('tlp') }}" name="tlp" required>
+                            <input type="number" class="form-control @error('tlp') is-invalid @enderror" value="{{ old('tlp') }}" name="tlp" required pattern="\d{12}">
                             @error('tlp')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -169,7 +169,7 @@ User | Hippam Kaligondo
                         </div>
                         <div class="form-group col-6">
                             <label for="">No. Telepon</label>
-                            <input type="number" class="form-control @error('tlp') is-invalid @enderror" value="" id="tlp" name="tlp" required>
+                            <input type="number" class="form-control @error('tlp') is-invalid @enderror" value="" id="tlp" name="tlp" required pattern="\d{12}">
                             @error('tlp')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -293,7 +293,7 @@ User | Hippam Kaligondo
 
     const hapus = id => {
         swal({
-            title             : "Apakah Anda Yakin waaaa?",
+            title             : "Apakah Anda Yakin?",
             text              : "Data Yang Sudah Dihapus Tidak Bisa Dikembalikan!",
             type              : "warning",
             showCancelButton  : true,
@@ -308,7 +308,7 @@ User | Hippam Kaligondo
                     $('#table-1').DataTable().ajax.reload();
                     swal({
                         type: 'success',
-                        title: 'Data Pelanggan berhasil dihapus.',
+                        title: 'Data Role berhasil dihapus.',
                         showConfirmButton: true,
                         confirmButtonClass: 'btn btn-success',
                     });
@@ -318,5 +318,6 @@ User | Hippam Kaligondo
             console.error(failed)
         })
     }
+
 </script>
 @endsection

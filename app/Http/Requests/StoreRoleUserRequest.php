@@ -29,7 +29,7 @@ class StoreRoleUserRequest extends FormRequest
             'alamat' => 'required',
             'rt' => 'required',
             'rw' => 'required',
-            'tlp' => 'required|numeric|unique:user',
+            'tlp' => 'required|digits:12|unique:user',
             'role_id' => ['required', Rule::exists(Role::class, 'id')],
         ];
     }

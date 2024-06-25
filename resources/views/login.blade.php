@@ -49,22 +49,10 @@
                             </div>
 
                             <div class="form-group row m-t-20">
-                                <!-- <div class="col-6">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="customControlInline">
-                                        <label class="custom-control-label" for="customControlInline">Ingat Saya</label>
-                                    </div>
-                                </div> -->
                                 <div class="col-6">
                                     <button class="btn btn-primary w-md waves-effect waves-light" type="submit">Masuk</button>
                                 </div>
                             </div>
-
-                            <!-- <div class="form-group m-t-10 mb-0 row">
-                                <div class="col-12 m-t-20">
-                                    <a href="#" class="text-muted"><i class="mdi mdi-lock"></i> Lupa Password?</a>
-                                </div>
-                            </div> -->
                         </form>
                     </div>
 

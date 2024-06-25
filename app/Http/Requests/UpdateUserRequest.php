@@ -29,7 +29,7 @@ class UpdateUserRequest extends FormRequest
             'alamat' => 'required',
             // 'rt' => 'required',
             // 'rw' => 'required',
-            'tlp' => ['required', 'numeric', Rule::unique(User::class, 'tlp')->ignore($this->user())],
+            'tlp' => ['required', 'digits:12', Rule::unique(User::class, 'tlp')->ignore($this->user())],
         ];
     }
 }

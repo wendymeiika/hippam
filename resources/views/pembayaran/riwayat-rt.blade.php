@@ -137,36 +137,6 @@ Riwayat | Hippam Kaligondo
         <h6 class="font-weight-bold mt-3">Status : <span class="text-success">LUNAS</span></h6>
     </div>
 </div>
-
-<!-- Modal Form Upload ulang Bukti -->
-{{-- <div class="modal fade" id="buktiModal" tabindex="-1" aria-labelledby="buktiModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="buktiModalLabel">Unggah Ulang Bukti</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="form-upload" action="" method="post" enctype="multipart/form-data">
-            @csrf
-            <div class="form-group">
-                <label for="">Bukti Pembayaran</label>
-                <input type="file" accept="image/*" class="form-control filestyle" name="bukti" data-buttonname="btn-secondary" required>
-                @error('bukti')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-        <button type="submit" class="btn btn-primary">Unggah</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div> --}}
 @endsection
 
 @section('js')

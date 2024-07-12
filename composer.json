@@ -9,7 +9,7 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^10.0",
         "laravel/pint": "^1.15",
-        "laravel/sanctum": "^3.2",
+        "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.5",
         "yajra/laravel-datatables-oracle": "^10.3"
     },

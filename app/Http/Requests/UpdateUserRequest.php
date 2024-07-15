@@ -23,13 +23,28 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user(); // Mengambil instance user saat ini dari request
+
         return [
             'nama' => 'required',
-            'username' => ['required', Rule::unique(User::class, 'username')->ignore($this->user())],
+            'username' => [
+                'required',
+                Rule::unique(User::class, 'username')->ignore($user), // Mengabaikan pengguna saat ini
+            ],
             'alamat' => 'required',
-            // 'rt' => 'required',
-            // 'rw' => 'required',
-            'tlp' => ['required', 'digits:12', Rule::unique(User::class, 'tlp')->ignore($this->user())],
+            'tlp' => [
+                'required',
+                'digits:12',
+                Rule::unique(User::class, 'tlp')->ignore($user), // Mengabaikan pengguna saat ini
+            ],
+            'rt' => [
+                'required_if:rw,null', // Membutuhkan rt jika rw kosong
+                Rule::unique(User::class, 'rt')->ignore($user), // Mengabaikan pengguna saat ini
+            ],
+            'rw' => [
+                'required_if:rt,null', // Membutuhkan rw jika rt kosong
+                Rule::unique(User::class, 'rw')->ignore($user), // Mengabaikan pengguna saat ini
+            ],
         ];
     }
 }

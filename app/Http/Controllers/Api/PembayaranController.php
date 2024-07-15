@@ -18,13 +18,13 @@ class PembayaranController extends Controller
     public function index(Request $request): JsonResponse
     {
         return response()->json($request->user()->role->permissions()->where('name', 'Validasi')->exists()
-        ? Pembayaran::orderBy('id', 'desc')->get(['id_pelanggan', 'bulan', 'tahun', 'bukti', 'status'])
-        : $request->user()->pembayarans()->orderBy('id', 'desc')->get(['id_pelanggan', 'bulan', 'tahun', 'bukti', 'status']));
+        ? Pembayaran::orderBy('id', 'desc')->get(['id_pelanggan', 'bulan', 'tahun', 'bukti', 'status','created_at'])
+        : $request->user()->pembayarans()->orderBy('id', 'desc')->get(['id_pelanggan', 'bulan', 'tahun', 'bukti', 'status','created_at']));
     }
 
     public function list(): JsonResponse
     {
-        return response()->json(Pembayaran::orderBy('id', 'desc')->get(['id_pelanggan', 'bulan', 'tahun', 'bukti', 'status']));
+        return response()->json(Pembayaran::orderBy('id', 'desc')->get(['id_pelanggan', 'bulan', 'tahun', 'bukti', 'status','created_at']));
     }
 
     public function bayar(Request $request): JsonResponse

@@ -81,47 +81,47 @@ class KeluhanController extends Controller
 
 
     public function update(Request $request, $id)
-{
-    try {
-        // Hapus semua validasi
-        // $validator = Validator::make($request->all(), [
-        //     'keluhan' => 'required',
-        //     'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        // ]);
+    {
+        try {
+            // Hapus semua validasi
+            // $validator = Validator::make($request->all(), [
+            //     'keluhan' => 'required',
+            //     'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json(['error' => $validator->errors()], 422);
-        // }
+            // if ($validator->fails()) {
+            //     return response()->json(['error' => $validator->errors()], 422);
+            // }
 
-        $update = [
-            'keluhan' => $request->keluhan,
-        ];
+            $update = [
+                'keluhan' => $request->keluhan,
+            ];
 
-        $keluhan = Keluhan::find($id);
+            $keluhan = Keluhan::find($id);
 
-        if (!$keluhan) {
-            return response()->json(['error' => 'Keluhan not found'], 404);
-        }
-
-        if ($request->hasFile('gambar')) {
-            $path = 'images/info/';
-            $gambar = $request->file('gambar')->store($path, 'public');
-            $update['gambar'] = $gambar;
-
-            if (Storage::disk('public')->exists($path . $keluhan->gambar)) {
-                Storage::disk('public')->delete($path . $keluhan->gambar);
+            if (!$keluhan) {
+                return response()->json(['error' => 'Keluhan not found'], 404);
             }
+
+            if ($request->hasFile('gambar')) {
+                $path = 'images/info/';
+                $gambar = $request->file('gambar')->store($path, 'public');
+                $update['gambar'] = $gambar;
+
+                if (Storage::disk('public')->exists($path . $keluhan->gambar)) {
+                    Storage::disk('public')->delete($path . $keluhan->gambar);
+                }
+            }
+
+            $keluhan->update($update);
+
+            return response()->json(['success' => 'Berhasil memperbarui Keluhan', 'keluhan' => $keluhan], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan saat memperbarui Keluhan'], 500);
         }
-
-        $keluhan->update($update);
-
-        return response()->json(['success' => 'Berhasil memperbarui Keluhan', 'keluhan' => $keluhan], 200);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Terjadi kesalahan saat memperbarui Keluhan'], 500);
     }
-}
 
-    
+
 
     public function delete($id)
     {
@@ -136,14 +136,13 @@ class KeluhanController extends Controller
     public function balas(StoreBalasanRequest $request, Keluhan $keluhan): JsonResponse
     {
         $keluhan->load('user');
-    
+
         Pipeline::send($request)
             ->through([
                 ReplyKeluhan::class,
                 NotifyPelanggan::class,
             ])->thenReturn();
-    
+
         return response()->json(['success' => 'Berhasil mengirim balasan keluhan'], 200);
     }
-    
 }

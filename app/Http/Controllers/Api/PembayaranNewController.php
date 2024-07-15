@@ -42,7 +42,7 @@ class PembayaranNewController extends Controller
     {
         $pembayarans = Pembayaran::orderByDesc('id')
             ->with('user:id,nama,rt,rw,alamat,tlp')
-            ->select('id', 'id_pelanggan', 'bulan', 'tahun', 'bukti', 'status')
+            ->select('id', 'id_pelanggan', 'bulan', 'tahun', 'bukti', 'status','created_at', 'updated_at')
             ->get()
             ->map(function ($pembayaran) {
                 $pembayaran->nama = $pembayaran->user->nama;

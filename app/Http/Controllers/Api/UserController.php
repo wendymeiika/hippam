@@ -98,49 +98,27 @@ class UserController extends Controller
         return view('profile.ganti-password');
     }
 
-    public function updateProfile(UpdateUserRequest $request)
+    public function updateProfile(UpdateUserRequest $request): JsonResponse
     {
-        $request->user()->update($request->validated());
-
-        return back()->with('success', 'Profile berhasil diperbarui.');
+        try {
+            $user = $request->user();
+            $user->update($request->validated());
+    
+            return response()->json(['message' => 'Profil berhasil diperbarui.', 'user' => $user], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal memperbarui profil.'], 500);
+        }
     }
+    
 
     public function updatePassword(UpdateUserPasswordRequest $request)
     {
         $request->user()->update([
             'password' => Hash::make($request->password),
         ]);
-
-        return back()->with('success', 'Password berhasil diperbarui');
+    
+        return response()->json(['message' => 'Password berhasil diperbarui'], 200);
     }
-
-    // Tambahkan metode login untuk Sanctum
-    public function login(Request $request): JsonResponse
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ]);
-    }
-
-    // Tambahkan metode logout untuk Sanctum
-    public function logout(Request $request): JsonResponse
-    {
-        $request->user()->tokens()->delete();
-
-        return response()->json(['message' => 'Logged out successfully']);
-    }
+    
+    
 }

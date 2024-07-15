@@ -61,40 +61,40 @@ class PengumumanController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            // Hapus semua validasi
-            // $validator = Validator::make($request->all(), []);
-    
+            $validator = Validator::make($request->all(), [
+                'deskripsi' => 'required',
+                'poster' => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
+            }
+
             $update = [
                 'deskripsi' => $request->deskripsi,
             ];
-    
+
             $info = Pengumuman::find($id);
-    
-            if ($request->hasFile('poster')) {
-                // Jika ada file poster yang diunggah, proses file tersebut
+
+            if ($request->poster) {
                 $path = 'images/info/';
-    
-                // Upload poster baru
-                $poster = $request->file('poster')->store($path, 'public');
+
+                $poster = uploads($request->poster, $path);
                 $update['poster'] = $poster;
-    
-                // Hapus poster lama jika ada
+
                 if (Storage::disk('public')->exists($path.$info->poster)) {
                     Storage::disk('public')->delete($path.$info->poster);
                 }
             }
-    
-            // Update pengumuman dengan data baru
+
             $info->update($update);
-    
-            // Kembalikan respons JSON sukses
+
             return response()->json(['message' => 'Berhasil memperbarui Pengumuman', 'data' => $info], 200);
         } catch (Exception $e) {
             // Tangani error dan kembalikan respons JSON dengan status error
             return response()->json(['error' => 'Gagal memperbarui Pengumuman', 'message' => $e->getMessage()], 500);
         }
     }
-    
     
 
     public function delete($id)

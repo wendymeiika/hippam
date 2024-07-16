@@ -261,9 +261,6 @@ class PembayaranController extends Controller
                     return back()->with('error', 'Pastikan tanggal dipilih dengan benar!');
                 }
 
-                // $dari = Carbon::parse($request->dari)->translatedFormat('d F Y');
-                // $sampai = Carbon::parse($request->sampai)->translatedFormat('d F Y');
-
                 $dari = $request->dari;
                 $sampai = $request->sampai;
 

@@ -25,23 +25,6 @@ class KeluhanController extends Controller
         return view('keluhan.list-keluhan');
     }
 
-    // public function keluhanList(Request $request)
-    // {
-    //     $data = Keluhan::query()
-    //         ->when(
-    //             $request->user()->role->permissions()->where('name', 'Tambah Keluhan')->exists(),
-    //             fn (Builder $query) => $query->where('id_pelanggan', $request->user()->id),
-    //         )->latest()
-    //         ->get();
-
-    //     return DataTables::of($data)
-    //         ->addIndexColumn()
-    //         ->make(true);
-
-    //     if ($request->ajax()) {
-    //     }
-    // }
-
     public function keluhanList(Request $request)
     {
         $data = Keluhan::with('balasan')
@@ -54,10 +37,7 @@ class KeluhanController extends Controller
 
         return DataTables::of($data)
             ->addIndexColumn()
-            // ->addColumn('balasan_petugas', function ($keluhan) {
-            //     return $keluhan->balasan->map(fn (Balasan $balasan) => $balasan->balasan);
-            // })
-            ->rawColumns(['balasan_petugas']) // Allow HTML rendering
+            ->rawColumns(['balasan_petugas']) 
             ->make(true);
     }
 

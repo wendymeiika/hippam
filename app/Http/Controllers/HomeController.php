@@ -23,23 +23,6 @@ class HomeController extends Controller
         ));
     }
 
-    // protected function administrate(): array
-    // {
-    //     return [
-    //         'total' => $total = User::query()
-    //             ->whereHas('role', fn ($query) => $query->where('name', 'pelanggan'))
-    //             ->count(),
-
-    //         'sudah' => $sudah = User::query()
-    //             ->whereHas('role', fn ($query) => $query->where('name', 'pelanggan'))
-    //             ->whereHas(
-    //                 'pembayarans',
-    //                 fn ($query) => $query->where('status', 'success')->where('tahun', now()->year)->where('bulan', Str::padLeft(now()->month, 2, 0)))
-    //             ->count(),
-    //         'belum' => $total - $sudah,
-    //     ];
-    // }
-
     protected function administrate(): array
     {
         // Menghitung jumlah pelanggan
@@ -83,5 +66,4 @@ class HomeController extends Controller
             'jumlahAdmin' => $jumlahAdmin,
         ];
     }
-
 }

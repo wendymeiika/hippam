@@ -32,4 +32,15 @@ class NotifikasiController extends Controller
             ->addIndexColumn()
             ->make(true);
     }
+
+    public function destroy($id)
+    {
+    $notifikasi = Notifikasi::find($id);
+    if ($notifikasi) {
+        $notifikasi->delete();
+        return response()->json(['success' => 'Notifikasi berhasil dihapus.']);
+    }
+    return response()->json(['error' => 'Notifikasi tidak ditemukan.'], 404);
+    }
+
 }

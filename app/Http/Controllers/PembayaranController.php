@@ -153,26 +153,53 @@ class PembayaranController extends Controller
         return back()->with('success', 'Pembayaran berhasil, tunggu validasi petugas.');
     }
 
+    // public function validating(UpdatePembayaranValidationRequest $request, Pembayaran $pembayaran)
+    // {
+    //     $pembayaran->update([
+    //         'status' => $request->status,
+    //         'read' => true,
+    //     ]);
+
+    //     $message = 'Pembayaran hippam bulan '.Bulan::from($pembayaran->bulan)->name.' '.$pembayaran->tahun.' '
+    //     .($request->status == 'success' ? 'diverifikasi.' : 'ditolak. Silahkan unggah ulang bukti yang benar.');
+
+    //     Notifikasi::create([
+    //         'id_pelanggan' => $pembayaran->id_pelanggan,
+    //         'nama' => $pembayaran->nama,
+    //         'tlp' => $pembayaran->tlp,
+    //         'type' => 'pembayaran',
+    //         'pesan' => $message,
+    //         'petugas' => 0,
+    //     ]);
+
+    //     return response()->json('success', 200);
+    // }
+
     public function validating(UpdatePembayaranValidationRequest $request, Pembayaran $pembayaran)
     {
-        $pembayaran->update([
-            'status' => $request->status,
-            'read' => true,
-        ]);
+        // Pastikan hanya petugas yang bisa memvalidasi atau menolak pembayaran
+        if ($request->user()->role->permissions()->where('name', 'Validasi')->exists()) {
+            $pembayaran->update([
+                'status' => $request->status,
+                'read' => true,
+            ]);
 
-        $message = 'Pembayaran hippam bulan '.Bulan::from($pembayaran->bulan)->name.' '.$pembayaran->tahun.' '
-        .($request->status == 'success' ? 'diverifikasi.' : 'ditolak. Silahkan unggah ulang bukti yang benar.');
+            $message = 'Pembayaran hippam bulan '.Bulan::from($pembayaran->bulan)->name.' '.$pembayaran->tahun.' '
+            .($request->status == 'success' ? 'diverifikasi.' : 'ditolak. Silahkan unggah ulang bukti yang benar.');
 
-        Notifikasi::create([
-            'id_pelanggan' => $pembayaran->id_pelanggan,
-            'nama' => $pembayaran->nama,
-            'tlp' => $pembayaran->tlp,
-            'type' => 'pembayaran',
-            'pesan' => $message,
-            'petugas' => 0,
-        ]);
+            Notifikasi::create([
+                'id_pelanggan' => $pembayaran->id_pelanggan,
+                'nama' => $pembayaran->nama,
+                'tlp' => $pembayaran->tlp,
+                'type' => 'pembayaran',
+                'pesan' => $message,
+                'petugas' => 0,
+            ]);
 
-        return response()->json('success', 200);
+            return response()->json('success', 200);
+        }
+
+        return response()->json('forbidden', 403);
     }
 
 
@@ -323,4 +350,23 @@ class PembayaranController extends Controller
             ->addIndexColumn()
             ->make(true);
     }
+
+    public function delete($id)
+    {
+        try {
+            $pembayaran = Pembayaran::findOrFail($id);
+
+            // Hapus file bukti jika ada
+            if ($pembayaran->bukti) {
+                Storage::delete('images/bukti/' . $pembayaran->bukti);
+            }
+
+            $pembayaran->delete();
+
+            return response()->json(['message' => 'Pembayaran berhasil dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

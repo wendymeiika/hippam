@@ -8,7 +8,6 @@ Pembayaran | Hippam Kaligondo
 <div class="wrapper">
     <div class="page-title-box">
         <div class="container-fluid">
-
             <div class="row">
                 <div class="col-sm-12">
                     <h4 class="page-title">Pembayaran</h4>
@@ -16,7 +15,6 @@ Pembayaran | Hippam Kaligondo
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="page-content-wrapper">
@@ -45,7 +43,6 @@ Pembayaran | Hippam Kaligondo
             </div>
         </div>
     </div>
-
 </div>
 @endsection
 
@@ -53,7 +50,7 @@ Pembayaran | Hippam Kaligondo
 <script>
     $.ajaxSetup({
         headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
 
@@ -112,19 +109,19 @@ Pembayaran | Hippam Kaligondo
             }
         },
         {
-          targets: -1,
-          orderable: false,
-          render: function (data, type, full, meta) {
-            return full.status == 'waiting' ?
-            `<div class="btn-group bg-secondary text-white">
-                <a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>
-                <div class="dropdown-menu dropdown-menu-right">
-                <a href="javascript:;" class="dropdown-item bg-success text-white" onclick="validation(${full.id}, 'success')">Valid</a>
-                <a href="javascript:;" class="dropdown-item bg-danger text-white" onclick="validation(${full.id}, 'reject')">Tolak</a>
-                </div>
-            </div>`
-            : 'Tidak ada aksi.'
-          }
+            targets: -1,
+            orderable: false,
+            render: function (data, type, full, meta) {
+                return full.status === 'waiting' ?
+                `<div class="btn-group bg-secondary text-white">
+                    <a class="btn dropdown-toggle hide-arrow" data-toggle="dropdown">Aksi</a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a href="javascript:;" class="dropdown-item bg-success text-white" onclick="validation(${full.id}, 'success')">Valid</a>
+                        <a href="javascript:;" class="dropdown-item bg-danger text-white" onclick="validation(${full.id}, 'reject')">Tolak</a>
+                    </div>
+                </div>`
+                : `<button class="btn btn-primary" onclick="deletePembayaran(${full.id})">Hapus</button>`;
+            }
         }
       ],
     });
@@ -154,6 +151,69 @@ Pembayaran | Hippam Kaligondo
                 }
             })
         });
+    }
+
+    // const deletePembayaran = (id) => {
+    //     swal({
+    //         title: "Apakah Anda Yakin?",
+    //         text: "Hapus pembayaran ini",
+    //         type: "warning",
+    //         showCancelButton: true,
+    //         confirmButtonColor: "#3085d6",
+    //         cancelButtonColor: "#d33",
+    //         confirmButtonText: "Ya"
+    //     }).then((result) => {
+    //         if (result.value) {
+    //             $.ajax({
+    //                 url: `{{ route('pembayaran.delete', ':id') }}`.replace(':id', id),
+    //                 `{{ route('keluhan.destroy', ':id') }}`.replace(':id', e),
+    //                 type: 'DELETE',
+    //                 success: (data) => {
+    //                     $('#table-1').DataTable().ajax.reload();
+    //                     swal({
+    //                         type: 'success',
+    //                         title: 'Pembayaran berhasil dihapus.',
+    //                         showConfirmButton: true,
+    //                         confirmButtonClass: 'btn btn-success',
+    //                     });
+    //                 },
+    //                 error: (err) => {
+    //                     swal({
+    //                         type: 'error',
+    //                         title: 'Terjadi kesalahan saat menghapus pembayaran.',
+    //                         showConfirmButton: true,
+    //                         confirmButtonClass: 'btn btn-danger',
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
+
+    function deletePembayaran(e) {
+        swal({
+            title             : "Apakah Anda Yakin ?",
+            text              : "Hapus pembayaran ini",
+            type              : "warning",
+            showCancelButton  : true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor : "#d33",
+            confirmButtonText : "Ya, Tetap Hapus!"
+        }).then((result) => {
+            $.ajax({
+                url    : `{{ route('pembayaran.delete', ':id') }}`.replace(':id', e),
+                type   : "delete",
+                success: function(data) {
+                    $('#table-1').DataTable().ajax.reload();
+                    swal({
+                        type: 'success',
+                        title: 'Pembayaran berhasil dihapus.',
+                        showConfirmButton: true,
+                        confirmButtonClass: 'btn btn-success',
+                    });
+                }
+            })
+        })
     }
 </script>
 @endsection

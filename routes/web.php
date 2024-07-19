@@ -58,8 +58,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/bayar-by-rt', 'bayarHippamByRT')->name('hippamByRT');
 
         Route::put('validate/{pembayaran}', 'validating')->name('validate');
-        // Route::post('/valid/{id}', 'valid')->name('validate');
-        // Route::post('/tolak/{id}', 'tolak')->name('reject');
+        Route::delete('/{id}', 'delete')->name('delete');
         Route::get('/riwayat', 'riwayat')->name('history');
         Route::post('/riwayat/upload-ulang/{id}', 'uploadUlang')->name('reupload');
     });
@@ -67,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     // notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index']);
     Route::post('/notifikasi/list', [NotifikasiController::class, 'list']);
+    Route::delete('notifikasi/delete/{id}', [NotifikasiController::class, 'destroy']);
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
